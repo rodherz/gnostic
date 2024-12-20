@@ -29,14 +29,15 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/googleapis/gnostic/compiler"
-	discovery_v1 "github.com/googleapis/gnostic/discovery"
-	"github.com/googleapis/gnostic/jsonwriter"
-	openapi_v2 "github.com/googleapis/gnostic/openapiv2"
-	openapi_v3 "github.com/googleapis/gnostic/openapiv3"
-	plugins "github.com/googleapis/gnostic/plugins"
-	surface "github.com/googleapis/gnostic/surface"
 	"gopkg.in/yaml.v3"
+
+	"github.com/google/gnostic/compiler"
+	discovery_v1 "github.com/google/gnostic/discovery"
+	"github.com/google/gnostic/jsonwriter"
+	openapi_v2 "github.com/google/gnostic/openapiv2"
+	openapi_v3 "github.com/google/gnostic/openapiv3"
+	plugins "github.com/google/gnostic/plugins"
+	surface "github.com/google/gnostic/surface"
 )
 
 // UsageError is a response to invalid command-line inputs
@@ -283,9 +284,6 @@ func writeFile(name string, bytes []byte, source string, extension string) {
 		writer = file
 	}
 	writer.Write(bytes)
-	if name == "-" || name == "=" {
-		writer.Write([]byte("\n"))
-	}
 }
 
 // The Gnostic structure holds global state information for gnostic.
@@ -411,6 +409,7 @@ func (g *Gnostic) validateOptions() error {
 		g.yamlOutputPath == "" &&
 		g.jsonOutputPath == "" &&
 		g.errorOutputPath == "" &&
+		g.messageOutputPath == "" &&
 		len(g.pluginCalls) == 0 {
 		return NewUsageError("missing output directives")
 	}
@@ -442,19 +441,22 @@ func (g *Gnostic) readOpenAPIText(bytes []byte) (message proto.Message, err erro
 	}
 	// Compile to the proto model.
 	if g.sourceFormat == SourceFormatOpenAPI2 {
-		document, err := openapi_v2.NewDocument(info.Content[0], compiler.NewContextWithExtensions("$root", nil, &g.extensionHandlers))
+		root := info.Content[0]
+		document, err := openapi_v2.NewDocument(root, compiler.NewContextWithExtensions("$root", root, nil, &g.extensionHandlers))
 		if err != nil {
 			return nil, err
 		}
 		message = document
 	} else if g.sourceFormat == SourceFormatOpenAPI3 {
-		document, err := openapi_v3.NewDocument(info.Content[0], compiler.NewContextWithExtensions("$root", nil, &g.extensionHandlers))
+		root := info.Content[0]
+		document, err := openapi_v3.NewDocument(root, compiler.NewContextWithExtensions("$root", root, nil, &g.extensionHandlers))
 		if err != nil {
 			return nil, err
 		}
 		message = document
 	} else {
-		document, err := discovery_v1.NewDocument(info.Content[0], compiler.NewContextWithExtensions("$root", nil, &g.extensionHandlers))
+		root := info.Content[0]
+		document, err := discovery_v1.NewDocument(root, compiler.NewContextWithExtensions("$root", root, nil, &g.extensionHandlers))
 		if err != nil {
 			return nil, err
 		}
@@ -514,7 +516,6 @@ func (g *Gnostic) writeTextOutput(message proto.Message) {
 func (g *Gnostic) writeJSONYAMLOutput(message proto.Message) {
 	// Convert the OpenAPI document into an exportable MapSlice.
 	var rawInfo *yaml.Node
-	var err error
 	if g.sourceFormat == SourceFormatOpenAPI2 {
 		document := message.(*openapi_v2.Document)
 		rawInfo = document.ToRawInfo()
@@ -533,9 +534,8 @@ func (g *Gnostic) writeJSONYAMLOutput(message proto.Message) {
 	}
 	// Optionally write description in yaml format.
 	if g.yamlOutputPath != "" {
-		var bytes []byte
 		if rawInfo != nil {
-			bytes, err = yaml.Marshal(rawInfo)
+			bytes, err := yaml.Marshal(rawInfo)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error generating yaml output %s\n", err.Error())
 				fmt.Fprintf(os.Stderr, "info %+v", rawInfo)
@@ -547,13 +547,12 @@ func (g *Gnostic) writeJSONYAMLOutput(message proto.Message) {
 	}
 	// Optionally write description in json format.
 	if g.jsonOutputPath != "" {
-		var bytes []byte
 		if rawInfo != nil {
 			rawInfo := &yaml.Node{
 				Kind:    yaml.DocumentNode,
 				Content: []*yaml.Node{rawInfo},
 			}
-			bytes, _ = jsonwriter.Marshal(rawInfo)
+			bytes, err := jsonwriter.Marshal(rawInfo)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error generating json output %s\n", err.Error())
 			}

@@ -15,15 +15,18 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/golang/protobuf/proto"
-	metrics "github.com/googleapis/gnostic/metrics"
-	vocabulary "github.com/googleapis/gnostic/metrics/vocabulary"
-	openapiv2 "github.com/googleapis/gnostic/openapiv2"
-	openapiv3 "github.com/googleapis/gnostic/openapiv3"
-	plugins "github.com/googleapis/gnostic/plugins"
+
+	discovery_v1 "github.com/google/gnostic/discovery"
+	metrics "github.com/google/gnostic/metrics"
+	vocabulary "github.com/google/gnostic/metrics/vocabulary"
+	openapiv2 "github.com/google/gnostic/openapiv2"
+	openapiv3 "github.com/google/gnostic/openapiv3"
+	plugins "github.com/google/gnostic/plugins"
 )
 
 // Record an error, then serialize and return a response.
@@ -64,6 +67,15 @@ func main() {
 				// Analyze the API document.
 				vocab = vocabulary.NewVocabularyFromOpenAPIv3(documentv3)
 			}
+		case "discovery.v1.Document":
+			discoveryDocument := &discovery_v1.Document{}
+			err = proto.Unmarshal(model.Value, discoveryDocument)
+			if err == nil {
+				// Analyze the API document.
+				vocab = vocabulary.NewVocabularyFromDiscovery(discoveryDocument)
+			}
+		default:
+			log.Printf("unsupported document type %s", model.TypeUrl)
 		}
 	}
 

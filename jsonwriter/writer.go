@@ -18,19 +18,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"strings"
+	"strconv"
 
 	"gopkg.in/yaml.v3"
 )
 
-const indentation = "  "
-
-// basic escaping, will need to be improved or replaced
-func escape(s string) string {
-	s = strings.Replace(s, "\n", "\\n", -1)
-	s = strings.Replace(s, "\"", "\\\"", -1)
-	return s
-}
+const (
+	indentation = "  "
+	null        = "null"
+)
 
 type writer struct {
 	b bytes.Buffer
@@ -85,15 +81,15 @@ func (w *writer) writeScalar(node *yaml.Node, indent string) {
 	}
 	switch node.Tag {
 	case "!!str":
-		w.writeString("\"")
-		w.writeString(escape(node.Value))
-		w.writeString("\"")
+		w.writeString(strconv.Quote(node.Value))
 	case "!!int":
 		w.writeString(node.Value)
 	case "!!float":
 		w.writeString(node.Value)
 	case "!!bool":
 		w.writeString(node.Value)
+	case "!!null":
+		w.writeString(null)
 	}
 }
 
@@ -123,7 +119,7 @@ func (w *writer) writeSequence(node *yaml.Node, indent string) {
 	w.writeString("]")
 }
 
-// Marshal writes a yaml.MapSlice as JSON
+// Marshal writes a yaml.Node as JSON
 func Marshal(in *yaml.Node) (out []byte, err error) {
 	var w writer
 
@@ -133,6 +129,12 @@ func Marshal(in *yaml.Node) (out []byte, err error) {
 		w.writeString("\n")
 	case yaml.MappingNode:
 		w.writeMap(in, "")
+		w.writeString("\n")
+	case yaml.SequenceNode:
+		w.writeSequence(in, "")
+		w.writeString("\n")
+	case yaml.ScalarNode:
+		w.writeScalar(in, "")
 		w.writeString("\n")
 	default:
 		return nil, errors.New("invalid type passed to Marshal")

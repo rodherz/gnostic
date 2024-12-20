@@ -18,10 +18,12 @@ package discovery_v1
 
 import (
 	"fmt"
-	"github.com/googleapis/gnostic/compiler"
-	"gopkg.in/yaml.v3"
 	"regexp"
 	"strings"
+
+	"gopkg.in/yaml.v3"
+
+	"github.com/google/gnostic/compiler"
 )
 
 // Version returns the package name (and OpenAPI version).
@@ -89,7 +91,7 @@ func NewAuth(in *yaml.Node, context *compiler.Context) (*Auth, error) {
 		v1 := compiler.MapValueForKey(m, "oauth2")
 		if v1 != nil {
 			var err error
-			x.Oauth2, err = NewOauth2(v1, compiler.NewContext("oauth2", context))
+			x.Oauth2, err = NewOauth2(v1, compiler.NewContext("oauth2", v1, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -196,7 +198,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 		v9 := compiler.MapValueForKey(m, "icons")
 		if v9 != nil {
 			var err error
-			x.Icons, err = NewIcons(v9, compiler.NewContext("icons", context))
+			x.Icons, err = NewIcons(v9, compiler.NewContext("icons", v9, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -279,7 +281,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 		v18 := compiler.MapValueForKey(m, "parameters")
 		if v18 != nil {
 			var err error
-			x.Parameters, err = NewParameters(v18, compiler.NewContext("parameters", context))
+			x.Parameters, err = NewParameters(v18, compiler.NewContext("parameters", v18, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -288,7 +290,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 		v19 := compiler.MapValueForKey(m, "auth")
 		if v19 != nil {
 			var err error
-			x.Auth, err = NewAuth(v19, compiler.NewContext("auth", context))
+			x.Auth, err = NewAuth(v19, compiler.NewContext("auth", v19, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -308,7 +310,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 		v21 := compiler.MapValueForKey(m, "schemas")
 		if v21 != nil {
 			var err error
-			x.Schemas, err = NewSchemas(v21, compiler.NewContext("schemas", context))
+			x.Schemas, err = NewSchemas(v21, compiler.NewContext("schemas", v21, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -317,7 +319,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 		v22 := compiler.MapValueForKey(m, "methods")
 		if v22 != nil {
 			var err error
-			x.Methods, err = NewMethods(v22, compiler.NewContext("methods", context))
+			x.Methods, err = NewMethods(v22, compiler.NewContext("methods", v22, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -326,7 +328,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 		v23 := compiler.MapValueForKey(m, "resources")
 		if v23 != nil {
 			var err error
-			x.Resources, err = NewResources(v23, compiler.NewContext("resources", context))
+			x.Resources, err = NewResources(v23, compiler.NewContext("resources", v23, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -491,7 +493,7 @@ func NewMediaUpload(in *yaml.Node, context *compiler.Context) (*MediaUpload, err
 		v3 := compiler.MapValueForKey(m, "protocols")
 		if v3 != nil {
 			var err error
-			x.Protocols, err = NewProtocols(v3, compiler.NewContext("protocols", context))
+			x.Protocols, err = NewProtocols(v3, compiler.NewContext("protocols", v3, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -518,7 +520,7 @@ func NewMethod(in *yaml.Node, context *compiler.Context) (*Method, error) {
 		message := fmt.Sprintf("has unexpected value: %+v (%T)", in, in)
 		errors = append(errors, compiler.NewError(context, message))
 	} else {
-		allowedKeys := []string{"description", "etagRequired", "flatPath", "httpMethod", "id", "mediaUpload", "parameterOrder", "parameters", "path", "request", "response", "scopes", "supportsMediaDownload", "supportsMediaUpload", "supportsSubscription", "useMediaDownloadService"}
+		allowedKeys := []string{"description", "etagRequired", "flatPath", "httpMethod", "id", "mediaUpload", "parameterOrder", "parameters", "path", "request", "response", "scopes", "streamingType", "supportsMediaDownload", "supportsMediaUpload", "supportsSubscription", "useMediaDownloadService"}
 		var allowedPatterns []*regexp.Regexp
 		invalidKeys := compiler.InvalidKeysInMap(m, allowedKeys, allowedPatterns)
 		if len(invalidKeys) > 0 {
@@ -565,7 +567,7 @@ func NewMethod(in *yaml.Node, context *compiler.Context) (*Method, error) {
 		v5 := compiler.MapValueForKey(m, "parameters")
 		if v5 != nil {
 			var err error
-			x.Parameters, err = NewParameters(v5, compiler.NewContext("parameters", context))
+			x.Parameters, err = NewParameters(v5, compiler.NewContext("parameters", v5, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -585,7 +587,7 @@ func NewMethod(in *yaml.Node, context *compiler.Context) (*Method, error) {
 		v7 := compiler.MapValueForKey(m, "request")
 		if v7 != nil {
 			var err error
-			x.Request, err = NewRequest(v7, compiler.NewContext("request", context))
+			x.Request, err = NewRequest(v7, compiler.NewContext("request", v7, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -594,7 +596,7 @@ func NewMethod(in *yaml.Node, context *compiler.Context) (*Method, error) {
 		v8 := compiler.MapValueForKey(m, "response")
 		if v8 != nil {
 			var err error
-			x.Response, err = NewResponse(v8, compiler.NewContext("response", context))
+			x.Response, err = NewResponse(v8, compiler.NewContext("response", v8, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -641,7 +643,7 @@ func NewMethod(in *yaml.Node, context *compiler.Context) (*Method, error) {
 		v13 := compiler.MapValueForKey(m, "mediaUpload")
 		if v13 != nil {
 			var err error
-			x.MediaUpload, err = NewMediaUpload(v13, compiler.NewContext("mediaUpload", context))
+			x.MediaUpload, err = NewMediaUpload(v13, compiler.NewContext("mediaUpload", v13, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -673,6 +675,15 @@ func NewMethod(in *yaml.Node, context *compiler.Context) (*Method, error) {
 				errors = append(errors, compiler.NewError(context, message))
 			}
 		}
+		// string streaming_type = 17;
+		v17 := compiler.MapValueForKey(m, "streamingType")
+		if v17 != nil {
+			x.StreamingType, ok = compiler.StringForScalarNode(v17)
+			if !ok {
+				message := fmt.Sprintf("has unexpected value for streamingType: %s", compiler.Display(v17))
+				errors = append(errors, compiler.NewError(context, message))
+			}
+		}
 	}
 	return x, compiler.NewErrorGroupOrNil(errors)
 }
@@ -696,7 +707,7 @@ func NewMethods(in *yaml.Node, context *compiler.Context) (*Methods, error) {
 				pair := &NamedMethod{}
 				pair.Name = k
 				var err error
-				pair.Value, err = NewMethod(v, compiler.NewContext(k, context))
+				pair.Value, err = NewMethod(v, compiler.NewContext(k, v, context))
 				if err != nil {
 					errors = append(errors, err)
 				}
@@ -736,7 +747,7 @@ func NewNamedMethod(in *yaml.Node, context *compiler.Context) (*NamedMethod, err
 		v2 := compiler.MapValueForKey(m, "value")
 		if v2 != nil {
 			var err error
-			x.Value, err = NewMethod(v2, compiler.NewContext("value", context))
+			x.Value, err = NewMethod(v2, compiler.NewContext("value", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -774,7 +785,7 @@ func NewNamedParameter(in *yaml.Node, context *compiler.Context) (*NamedParamete
 		v2 := compiler.MapValueForKey(m, "value")
 		if v2 != nil {
 			var err error
-			x.Value, err = NewParameter(v2, compiler.NewContext("value", context))
+			x.Value, err = NewParameter(v2, compiler.NewContext("value", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -812,7 +823,7 @@ func NewNamedResource(in *yaml.Node, context *compiler.Context) (*NamedResource,
 		v2 := compiler.MapValueForKey(m, "value")
 		if v2 != nil {
 			var err error
-			x.Value, err = NewResource(v2, compiler.NewContext("value", context))
+			x.Value, err = NewResource(v2, compiler.NewContext("value", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -850,7 +861,7 @@ func NewNamedSchema(in *yaml.Node, context *compiler.Context) (*NamedSchema, err
 		v2 := compiler.MapValueForKey(m, "value")
 		if v2 != nil {
 			var err error
-			x.Value, err = NewSchema(v2, compiler.NewContext("value", context))
+			x.Value, err = NewSchema(v2, compiler.NewContext("value", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -888,7 +899,7 @@ func NewNamedScope(in *yaml.Node, context *compiler.Context) (*NamedScope, error
 		v2 := compiler.MapValueForKey(m, "value")
 		if v2 != nil {
 			var err error
-			x.Value, err = NewScope(v2, compiler.NewContext("value", context))
+			x.Value, err = NewScope(v2, compiler.NewContext("value", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -917,7 +928,7 @@ func NewOauth2(in *yaml.Node, context *compiler.Context) (*Oauth2, error) {
 		v1 := compiler.MapValueForKey(m, "scopes")
 		if v1 != nil {
 			var err error
-			x.Scopes, err = NewScopes(v1, compiler.NewContext("scopes", context))
+			x.Scopes, err = NewScopes(v1, compiler.NewContext("scopes", v1, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1076,7 +1087,7 @@ func NewParameter(in *yaml.Node, context *compiler.Context) (*Parameter, error) 
 		v15 := compiler.MapValueForKey(m, "properties")
 		if v15 != nil {
 			var err error
-			x.Properties, err = NewSchemas(v15, compiler.NewContext("properties", context))
+			x.Properties, err = NewSchemas(v15, compiler.NewContext("properties", v15, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1085,7 +1096,7 @@ func NewParameter(in *yaml.Node, context *compiler.Context) (*Parameter, error) 
 		v16 := compiler.MapValueForKey(m, "additionalProperties")
 		if v16 != nil {
 			var err error
-			x.AdditionalProperties, err = NewSchema(v16, compiler.NewContext("additionalProperties", context))
+			x.AdditionalProperties, err = NewSchema(v16, compiler.NewContext("additionalProperties", v16, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1094,7 +1105,7 @@ func NewParameter(in *yaml.Node, context *compiler.Context) (*Parameter, error) 
 		v17 := compiler.MapValueForKey(m, "items")
 		if v17 != nil {
 			var err error
-			x.Items, err = NewSchema(v17, compiler.NewContext("items", context))
+			x.Items, err = NewSchema(v17, compiler.NewContext("items", v17, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1103,7 +1114,7 @@ func NewParameter(in *yaml.Node, context *compiler.Context) (*Parameter, error) 
 		v18 := compiler.MapValueForKey(m, "annotations")
 		if v18 != nil {
 			var err error
-			x.Annotations, err = NewAnnotations(v18, compiler.NewContext("annotations", context))
+			x.Annotations, err = NewAnnotations(v18, compiler.NewContext("annotations", v18, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1131,7 +1142,7 @@ func NewParameters(in *yaml.Node, context *compiler.Context) (*Parameters, error
 				pair := &NamedParameter{}
 				pair.Name = k
 				var err error
-				pair.Value, err = NewParameter(v, compiler.NewContext(k, context))
+				pair.Value, err = NewParameter(v, compiler.NewContext(k, v, context))
 				if err != nil {
 					errors = append(errors, err)
 				}
@@ -1162,7 +1173,7 @@ func NewProtocols(in *yaml.Node, context *compiler.Context) (*Protocols, error) 
 		v1 := compiler.MapValueForKey(m, "simple")
 		if v1 != nil {
 			var err error
-			x.Simple, err = NewSimple(v1, compiler.NewContext("simple", context))
+			x.Simple, err = NewSimple(v1, compiler.NewContext("simple", v1, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1171,7 +1182,7 @@ func NewProtocols(in *yaml.Node, context *compiler.Context) (*Protocols, error) 
 		v2 := compiler.MapValueForKey(m, "resumable")
 		if v2 != nil {
 			var err error
-			x.Resumable, err = NewResumable(v2, compiler.NewContext("resumable", context))
+			x.Resumable, err = NewResumable(v2, compiler.NewContext("resumable", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1238,7 +1249,7 @@ func NewResource(in *yaml.Node, context *compiler.Context) (*Resource, error) {
 		v1 := compiler.MapValueForKey(m, "methods")
 		if v1 != nil {
 			var err error
-			x.Methods, err = NewMethods(v1, compiler.NewContext("methods", context))
+			x.Methods, err = NewMethods(v1, compiler.NewContext("methods", v1, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1247,7 +1258,7 @@ func NewResource(in *yaml.Node, context *compiler.Context) (*Resource, error) {
 		v2 := compiler.MapValueForKey(m, "resources")
 		if v2 != nil {
 			var err error
-			x.Resources, err = NewResources(v2, compiler.NewContext("resources", context))
+			x.Resources, err = NewResources(v2, compiler.NewContext("resources", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1275,7 +1286,7 @@ func NewResources(in *yaml.Node, context *compiler.Context) (*Resources, error) 
 				pair := &NamedResource{}
 				pair.Name = k
 				var err error
-				pair.Value, err = NewResource(v, compiler.NewContext(k, context))
+				pair.Value, err = NewResource(v, compiler.NewContext(k, v, context))
 				if err != nil {
 					errors = append(errors, err)
 				}
@@ -1494,7 +1505,7 @@ func NewSchema(in *yaml.Node, context *compiler.Context) (*Schema, error) {
 		v14 := compiler.MapValueForKey(m, "properties")
 		if v14 != nil {
 			var err error
-			x.Properties, err = NewSchemas(v14, compiler.NewContext("properties", context))
+			x.Properties, err = NewSchemas(v14, compiler.NewContext("properties", v14, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1503,7 +1514,7 @@ func NewSchema(in *yaml.Node, context *compiler.Context) (*Schema, error) {
 		v15 := compiler.MapValueForKey(m, "additionalProperties")
 		if v15 != nil {
 			var err error
-			x.AdditionalProperties, err = NewSchema(v15, compiler.NewContext("additionalProperties", context))
+			x.AdditionalProperties, err = NewSchema(v15, compiler.NewContext("additionalProperties", v15, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1512,7 +1523,7 @@ func NewSchema(in *yaml.Node, context *compiler.Context) (*Schema, error) {
 		v16 := compiler.MapValueForKey(m, "items")
 		if v16 != nil {
 			var err error
-			x.Items, err = NewSchema(v16, compiler.NewContext("items", context))
+			x.Items, err = NewSchema(v16, compiler.NewContext("items", v16, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1530,7 +1541,7 @@ func NewSchema(in *yaml.Node, context *compiler.Context) (*Schema, error) {
 		v18 := compiler.MapValueForKey(m, "annotations")
 		if v18 != nil {
 			var err error
-			x.Annotations, err = NewAnnotations(v18, compiler.NewContext("annotations", context))
+			x.Annotations, err = NewAnnotations(v18, compiler.NewContext("annotations", v18, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1567,7 +1578,7 @@ func NewSchemas(in *yaml.Node, context *compiler.Context) (*Schemas, error) {
 				pair := &NamedSchema{}
 				pair.Name = k
 				var err error
-				pair.Value, err = NewSchema(v, compiler.NewContext(k, context))
+				pair.Value, err = NewSchema(v, compiler.NewContext(k, v, context))
 				if err != nil {
 					errors = append(errors, err)
 				}
@@ -1626,7 +1637,7 @@ func NewScopes(in *yaml.Node, context *compiler.Context) (*Scopes, error) {
 				pair := &NamedScope{}
 				pair.Name = k
 				var err error
-				pair.Value, err = NewScope(v, compiler.NewContext(k, context))
+				pair.Value, err = NewScope(v, compiler.NewContext(k, v, context))
 				if err != nil {
 					errors = append(errors, err)
 				}
@@ -1685,1167 +1696,4 @@ func NewStringArray(in *yaml.Node, context *compiler.Context) (*StringArray, err
 		x.Value = append(x.Value, s)
 	}
 	return x, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Annotations objects.
-func (m *Annotations) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Any objects.
-func (m *Any) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Auth objects.
-func (m *Auth) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Oauth2 != nil {
-		_, err := m.Oauth2.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Document objects.
-func (m *Document) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Icons != nil {
-		_, err := m.Icons.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Parameters != nil {
-		_, err := m.Parameters.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Auth != nil {
-		_, err := m.Auth.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Schemas != nil {
-		_, err := m.Schemas.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Methods != nil {
-		_, err := m.Methods.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Resources != nil {
-		_, err := m.Resources.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Icons objects.
-func (m *Icons) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside MediaUpload objects.
-func (m *MediaUpload) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Protocols != nil {
-		_, err := m.Protocols.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Method objects.
-func (m *Method) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Parameters != nil {
-		_, err := m.Parameters.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Request != nil {
-		_, err := m.Request.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Response != nil {
-		_, err := m.Response.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.MediaUpload != nil {
-		_, err := m.MediaUpload.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Methods objects.
-func (m *Methods) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NamedMethod objects.
-func (m *NamedMethod) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Value != nil {
-		_, err := m.Value.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NamedParameter objects.
-func (m *NamedParameter) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Value != nil {
-		_, err := m.Value.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NamedResource objects.
-func (m *NamedResource) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Value != nil {
-		_, err := m.Value.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NamedSchema objects.
-func (m *NamedSchema) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Value != nil {
-		_, err := m.Value.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NamedScope objects.
-func (m *NamedScope) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Value != nil {
-		_, err := m.Value.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Oauth2 objects.
-func (m *Oauth2) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Scopes != nil {
-		_, err := m.Scopes.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Parameter objects.
-func (m *Parameter) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.XRef != "" {
-		info, err := compiler.ReadInfoForRef(root, m.XRef)
-		if err != nil {
-			return nil, err
-		}
-		if info != nil {
-			replacement, err := NewParameter(info, nil)
-			if err == nil {
-				*m = *replacement
-				return m.ResolveReferences(root)
-			}
-		}
-		return info, nil
-	}
-	if m.Properties != nil {
-		_, err := m.Properties.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.AdditionalProperties != nil {
-		_, err := m.AdditionalProperties.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Items != nil {
-		_, err := m.Items.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Annotations != nil {
-		_, err := m.Annotations.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Parameters objects.
-func (m *Parameters) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Protocols objects.
-func (m *Protocols) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Simple != nil {
-		_, err := m.Simple.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Resumable != nil {
-		_, err := m.Resumable.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Request objects.
-func (m *Request) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.XRef != "" {
-		info, err := compiler.ReadInfoForRef(root, m.XRef)
-		if err != nil {
-			return nil, err
-		}
-		if info != nil {
-			replacement, err := NewRequest(info, nil)
-			if err == nil {
-				*m = *replacement
-				return m.ResolveReferences(root)
-			}
-		}
-		return info, nil
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Resource objects.
-func (m *Resource) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Methods != nil {
-		_, err := m.Methods.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Resources != nil {
-		_, err := m.Resources.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Resources objects.
-func (m *Resources) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Response objects.
-func (m *Response) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.XRef != "" {
-		info, err := compiler.ReadInfoForRef(root, m.XRef)
-		if err != nil {
-			return nil, err
-		}
-		return info, nil
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Resumable objects.
-func (m *Resumable) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Schema objects.
-func (m *Schema) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Properties != nil {
-		_, err := m.Properties.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.AdditionalProperties != nil {
-		_, err := m.AdditionalProperties.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Items != nil {
-		_, err := m.Items.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.XRef != "" {
-		info, err := compiler.ReadInfoForRef(root, m.XRef)
-		if err != nil {
-			return nil, err
-		}
-		if info != nil {
-			replacement, err := NewSchema(info, nil)
-			if err == nil {
-				*m = *replacement
-				return m.ResolveReferences(root)
-			}
-		}
-		return info, nil
-	}
-	if m.Annotations != nil {
-		_, err := m.Annotations.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Schemas objects.
-func (m *Schemas) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Scope objects.
-func (m *Scope) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Scopes objects.
-func (m *Scopes) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Simple objects.
-func (m *Simple) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside StringArray objects.
-func (m *StringArray) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ToRawInfo returns a description of Annotations suitable for JSON or YAML export.
-func (m *Annotations) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if len(m.Required) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("required"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Required))
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Any suitable for JSON or YAML export.
-func (m *Any) ToRawInfo() *yaml.Node {
-	var err error
-	var node yaml.Node
-	err = yaml.Unmarshal([]byte(m.Yaml), &node)
-	if err == nil {
-		if node.Kind == yaml.DocumentNode {
-			return node.Content[0]
-		}
-		return &node
-	} else {
-		return nil
-	}
-	return nil
-}
-
-// ToRawInfo returns a description of Auth suitable for JSON or YAML export.
-func (m *Auth) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Oauth2 != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("oauth2"))
-		info.Content = append(info.Content, m.Oauth2.ToRawInfo())
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Document suitable for JSON or YAML export.
-func (m *Document) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("kind"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Kind))
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("discoveryVersion"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.DiscoveryVersion))
-	if m.Id != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("id"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Id))
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	if m.Version != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("version"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Version))
-	}
-	if m.Revision != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("revision"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Revision))
-	}
-	if m.Title != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("title"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Title))
-	}
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.Icons != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("icons"))
-		info.Content = append(info.Content, m.Icons.ToRawInfo())
-	}
-	if m.DocumentationLink != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("documentationLink"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.DocumentationLink))
-	}
-	if len(m.Labels) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("labels"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Labels))
-	}
-	if m.Protocol != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("protocol"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Protocol))
-	}
-	if m.BaseUrl != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("baseUrl"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.BaseUrl))
-	}
-	if m.BasePath != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("basePath"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.BasePath))
-	}
-	if m.RootUrl != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("rootUrl"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.RootUrl))
-	}
-	if m.ServicePath != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("servicePath"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.ServicePath))
-	}
-	if m.BatchPath != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("batchPath"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.BatchPath))
-	}
-	if m.Parameters != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("parameters"))
-		info.Content = append(info.Content, m.Parameters.ToRawInfo())
-	}
-	if m.Auth != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("auth"))
-		info.Content = append(info.Content, m.Auth.ToRawInfo())
-	}
-	if len(m.Features) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("features"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Features))
-	}
-	if m.Schemas != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("schemas"))
-		info.Content = append(info.Content, m.Schemas.ToRawInfo())
-	}
-	if m.Methods != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("methods"))
-		info.Content = append(info.Content, m.Methods.ToRawInfo())
-	}
-	if m.Resources != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("resources"))
-		info.Content = append(info.Content, m.Resources.ToRawInfo())
-	}
-	if m.Etag != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("etag"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Etag))
-	}
-	if m.OwnerDomain != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("ownerDomain"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.OwnerDomain))
-	}
-	if m.OwnerName != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("ownerName"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.OwnerName))
-	}
-	if m.VersionModule != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("version_module"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.VersionModule))
-	}
-	if m.CanonicalName != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("canonicalName"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.CanonicalName))
-	}
-	if m.FullyEncodeReservedExpansion != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("fullyEncodeReservedExpansion"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.FullyEncodeReservedExpansion))
-	}
-	if m.PackagePath != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("packagePath"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.PackagePath))
-	}
-	if m.MtlsRootUrl != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("mtlsRootUrl"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.MtlsRootUrl))
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Icons suitable for JSON or YAML export.
-func (m *Icons) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("x16"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.X16))
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("x32"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.X32))
-	return info
-}
-
-// ToRawInfo returns a description of MediaUpload suitable for JSON or YAML export.
-func (m *MediaUpload) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if len(m.Accept) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("accept"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Accept))
-	}
-	if m.MaxSize != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxSize"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.MaxSize))
-	}
-	if m.Protocols != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("protocols"))
-		info.Content = append(info.Content, m.Protocols.ToRawInfo())
-	}
-	if m.SupportsSubscription != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("supportsSubscription"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.SupportsSubscription))
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Method suitable for JSON or YAML export.
-func (m *Method) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Id != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("id"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Id))
-	}
-	if m.Path != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("path"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Path))
-	}
-	if m.HttpMethod != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("httpMethod"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.HttpMethod))
-	}
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.Parameters != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("parameters"))
-		info.Content = append(info.Content, m.Parameters.ToRawInfo())
-	}
-	if len(m.ParameterOrder) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("parameterOrder"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.ParameterOrder))
-	}
-	if m.Request != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("request"))
-		info.Content = append(info.Content, m.Request.ToRawInfo())
-	}
-	if m.Response != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("response"))
-		info.Content = append(info.Content, m.Response.ToRawInfo())
-	}
-	if len(m.Scopes) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("scopes"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Scopes))
-	}
-	if m.SupportsMediaDownload != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("supportsMediaDownload"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.SupportsMediaDownload))
-	}
-	if m.SupportsMediaUpload != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("supportsMediaUpload"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.SupportsMediaUpload))
-	}
-	if m.UseMediaDownloadService != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("useMediaDownloadService"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.UseMediaDownloadService))
-	}
-	if m.MediaUpload != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("mediaUpload"))
-		info.Content = append(info.Content, m.MediaUpload.ToRawInfo())
-	}
-	if m.SupportsSubscription != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("supportsSubscription"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.SupportsSubscription))
-	}
-	if m.FlatPath != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("flatPath"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.FlatPath))
-	}
-	if m.EtagRequired != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("etagRequired"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.EtagRequired))
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Methods suitable for JSON or YAML export.
-func (m *Methods) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.AdditionalProperties != nil {
-		for _, item := range m.AdditionalProperties {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of NamedMethod suitable for JSON or YAML export.
-func (m *NamedMethod) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	// &{Name:value Type:Method StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:Mapped value}
-	return info
-}
-
-// ToRawInfo returns a description of NamedParameter suitable for JSON or YAML export.
-func (m *NamedParameter) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	// &{Name:value Type:Parameter StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:Mapped value}
-	return info
-}
-
-// ToRawInfo returns a description of NamedResource suitable for JSON or YAML export.
-func (m *NamedResource) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	// &{Name:value Type:Resource StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:Mapped value}
-	return info
-}
-
-// ToRawInfo returns a description of NamedSchema suitable for JSON or YAML export.
-func (m *NamedSchema) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	// &{Name:value Type:Schema StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:Mapped value}
-	return info
-}
-
-// ToRawInfo returns a description of NamedScope suitable for JSON or YAML export.
-func (m *NamedScope) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	// &{Name:value Type:Scope StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:Mapped value}
-	return info
-}
-
-// ToRawInfo returns a description of Oauth2 suitable for JSON or YAML export.
-func (m *Oauth2) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Scopes != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("scopes"))
-		info.Content = append(info.Content, m.Scopes.ToRawInfo())
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Parameter suitable for JSON or YAML export.
-func (m *Parameter) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Id != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("id"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Id))
-	}
-	if m.Type != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type))
-	}
-	if m.XRef != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("$ref"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.XRef))
-	}
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.Default != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("default"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Default))
-	}
-	if m.Required != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("required"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.Required))
-	}
-	if m.Format != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("format"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Format))
-	}
-	if m.Pattern != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("pattern"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Pattern))
-	}
-	if m.Minimum != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Minimum))
-	}
-	if m.Maximum != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Maximum))
-	}
-	if len(m.Enum) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("enum"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Enum))
-	}
-	if len(m.EnumDescriptions) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("enumDescriptions"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.EnumDescriptions))
-	}
-	if m.Repeated != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("repeated"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.Repeated))
-	}
-	if m.Location != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("location"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Location))
-	}
-	if m.Properties != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("properties"))
-		info.Content = append(info.Content, m.Properties.ToRawInfo())
-	}
-	if m.AdditionalProperties != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("additionalProperties"))
-		info.Content = append(info.Content, m.AdditionalProperties.ToRawInfo())
-	}
-	if m.Items != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("items"))
-		info.Content = append(info.Content, m.Items.ToRawInfo())
-	}
-	if m.Annotations != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("annotations"))
-		info.Content = append(info.Content, m.Annotations.ToRawInfo())
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Parameters suitable for JSON or YAML export.
-func (m *Parameters) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.AdditionalProperties != nil {
-		for _, item := range m.AdditionalProperties {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Protocols suitable for JSON or YAML export.
-func (m *Protocols) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Simple != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("simple"))
-		info.Content = append(info.Content, m.Simple.ToRawInfo())
-	}
-	if m.Resumable != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("resumable"))
-		info.Content = append(info.Content, m.Resumable.ToRawInfo())
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Request suitable for JSON or YAML export.
-func (m *Request) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.XRef != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("$ref"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.XRef))
-	}
-	if m.ParameterName != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("parameterName"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.ParameterName))
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Resource suitable for JSON or YAML export.
-func (m *Resource) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Methods != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("methods"))
-		info.Content = append(info.Content, m.Methods.ToRawInfo())
-	}
-	if m.Resources != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("resources"))
-		info.Content = append(info.Content, m.Resources.ToRawInfo())
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Resources suitable for JSON or YAML export.
-func (m *Resources) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.AdditionalProperties != nil {
-		for _, item := range m.AdditionalProperties {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Response suitable for JSON or YAML export.
-func (m *Response) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.XRef != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("$ref"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.XRef))
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Resumable suitable for JSON or YAML export.
-func (m *Resumable) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Multipart != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("multipart"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.Multipart))
-	}
-	if m.Path != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("path"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Path))
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Schema suitable for JSON or YAML export.
-func (m *Schema) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Id != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("id"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Id))
-	}
-	if m.Type != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type))
-	}
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.Default != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("default"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Default))
-	}
-	if m.Required != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("required"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.Required))
-	}
-	if m.Format != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("format"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Format))
-	}
-	if m.Pattern != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("pattern"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Pattern))
-	}
-	if m.Minimum != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Minimum))
-	}
-	if m.Maximum != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Maximum))
-	}
-	if len(m.Enum) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("enum"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Enum))
-	}
-	if len(m.EnumDescriptions) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("enumDescriptions"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.EnumDescriptions))
-	}
-	if m.Repeated != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("repeated"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.Repeated))
-	}
-	if m.Location != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("location"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Location))
-	}
-	if m.Properties != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("properties"))
-		info.Content = append(info.Content, m.Properties.ToRawInfo())
-	}
-	if m.AdditionalProperties != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("additionalProperties"))
-		info.Content = append(info.Content, m.AdditionalProperties.ToRawInfo())
-	}
-	if m.Items != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("items"))
-		info.Content = append(info.Content, m.Items.ToRawInfo())
-	}
-	if m.XRef != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("$ref"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.XRef))
-	}
-	if m.Annotations != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("annotations"))
-		info.Content = append(info.Content, m.Annotations.ToRawInfo())
-	}
-	if m.ReadOnly != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("readOnly"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ReadOnly))
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Schemas suitable for JSON or YAML export.
-func (m *Schemas) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.AdditionalProperties != nil {
-		for _, item := range m.AdditionalProperties {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Scope suitable for JSON or YAML export.
-func (m *Scope) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Scopes suitable for JSON or YAML export.
-func (m *Scopes) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.AdditionalProperties != nil {
-		for _, item := range m.AdditionalProperties {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Simple suitable for JSON or YAML export.
-func (m *Simple) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Multipart != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("multipart"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.Multipart))
-	}
-	if m.Path != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("path"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Path))
-	}
-	return info
-}
-
-// ToRawInfo returns a description of StringArray suitable for JSON or YAML export.
-func (m *StringArray) ToRawInfo() *yaml.Node {
-	return compiler.NewSequenceNodeForStringArray(m.Value)
 }

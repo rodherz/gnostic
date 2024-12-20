@@ -24,8 +24,9 @@ import (
 	"sort"
 	"strings"
 
-	metrics "github.com/googleapis/gnostic/metrics"
 	"google.golang.org/protobuf/proto"
+
+	metrics "github.com/google/gnostic/metrics"
 )
 
 type Vocabulary struct {
@@ -42,10 +43,11 @@ func WriteCSV(v *metrics.Vocabulary, filename string) error {
 		filename = "vocabulary-operation.csv"
 	}
 	f4, ferror := os.Create(filename)
-	defer f4.Close()
 	if ferror != nil {
 		return ferror
 	}
+	defer f4.Close()
+
 	for _, s := range v.Schemas {
 		temp := fmt.Sprintf("%s,\"%s\",%d\n", "schemas", s.Word, int(s.Count))
 		f4.WriteString(temp)

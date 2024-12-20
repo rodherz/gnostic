@@ -18,11 +18,13 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 
-	"github.com/googleapis/gnostic/jsonschema"
 	"gopkg.in/yaml.v3"
+
+	"github.com/google/gnostic/jsonschema"
 )
 
 func usage() {
@@ -48,11 +50,13 @@ func main() {
 	filename := os.Args[1]
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
-		panic(err)
+		log.Fatalf("error reading file: %v", err)
 	}
 	var node yaml.Node
 	err = yaml.Unmarshal(file, &node)
-
+	if err != nil {
+		log.Fatalf("error unmarshaling yaml file: %v", err)
+	}
 	dump(&node, "")
 
 	switch os.Args[2] {
@@ -62,7 +66,7 @@ func main() {
 	case "--yaml":
 		result, err := yaml.Marshal(&node)
 		if err != nil {
-			panic(err)
+			log.Fatalf("error marshaling yaml: %v", err)
 		}
 		fmt.Printf("%s", string(result))
 	default:

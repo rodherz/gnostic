@@ -24,7 +24,7 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/googleapis/gnostic/plugins/gnostic-analyze/statistics"
+	"github.com/google/gnostic/plugins/gnostic-analyze/statistics"
 )
 
 // Results are collected in this global slice.
@@ -32,6 +32,9 @@ var stats []statistics.DocumentStatistics
 
 // walker is called for each summary file found.
 func walker(p string, info os.FileInfo, err error) error {
+	if err != nil {
+		return err
+	}
 	basename := path.Base(p)
 	if basename != "summary.json" {
 		return nil

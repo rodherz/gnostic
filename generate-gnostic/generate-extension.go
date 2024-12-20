@@ -26,9 +26,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/googleapis/gnostic/compiler"
-	"github.com/googleapis/gnostic/jsonschema"
-	"github.com/googleapis/gnostic/printer"
+	"github.com/google/gnostic/compiler"
+	"github.com/google/gnostic/jsonschema"
+	"github.com/google/gnostic/printer"
 )
 
 var protoOptionsForExtensions = []ProtoOption{
@@ -72,7 +72,7 @@ const caseStringForObjectTypes = "\n" +
 	"  return true, nil, err\n" +
 	"}\n" +
 	"info = *info.Content[0]\n" +
-	"newObject, err := %s.New%s(&info, compiler.NewContext(\"$root\", nil))\n" +
+	"newObject, err := %s.New%s(&info, compiler.NewContext(\"$root\", &info, nil))\n" +
 	"return true, newObject, err"
 
 const caseStringForWrapperTypes = "\n" +
@@ -86,7 +86,7 @@ const caseStringForWrapperTypes = "\n" +
 	"if !ok {\n" +
 	"	return true, nil, nil\n" +
 	"}\n" +
-	"newObject := &wrappers.%s{Value: v}\n" +
+	"newObject := &wrapperspb.%s{Value: v}\n" +
 	"return true, newObject, nil"
 
 // generateMainFile generates the main program for an extension.
@@ -254,7 +254,7 @@ func generateExtension(schemaFile string, outDir string) error {
 		},
 		ProtoOption{
 			Name:    "go_package",
-			Value:   ".;" + strings.ToLower(protoPackage),
+			Value:   "./;" + strings.ToLower(protoPackage),
 			Comment: "// The Go package path.",
 		},
 	)
@@ -272,7 +272,7 @@ func generateExtension(schemaFile string, outDir string) error {
 		"fmt",
 		"regexp",
 		"strings",
-		"github.com/googleapis/gnostic/compiler",
+		"github.com/google/gnostic/compiler",
 		"gopkg.in/yaml.v3",
 	})
 	goFilename := path.Join(protoOutDirectory, outFileBaseName+".go")
@@ -281,13 +281,16 @@ func generateExtension(schemaFile string, outDir string) error {
 		return err
 	}
 	err = exec.Command(runtime.GOROOT()+"/bin/gofmt", "-w", goFilename).Run()
+	if err != nil {
+		return err
+	}
 
 	// generate the main file.
 
 	// TODO: This path is currently fixed to the location of the samples.
 	//       Can we make it relative, perhaps with an option or by generating
 	//       a go.mod file for the generated extension handler?
-	outDirRelativeToPackageRoot := "github.com/googleapis/gnostic/extensions/sample/" + outDir
+	outDirRelativeToPackageRoot := "github.com/google/gnostic/extensions/sample/" + outDir
 
 	var extensionNameKeys []string
 	for k := range extensionNameToMessageName {
@@ -314,14 +317,14 @@ func generateExtension(schemaFile string, outDir string) error {
 	}
 	extMainCode := fmt.Sprintf(additionalCompilerCodeWithMain, cases)
 	imports := []string{
-		"github.com/golang/protobuf/proto",
-		"github.com/googleapis/gnostic/extensions",
-		"github.com/googleapis/gnostic/compiler",
+		"github.com/google/gnostic/extensions",
+		"github.com/google/gnostic/compiler",
+		"google.golang.org/protobuf/proto",
 		"gopkg.in/yaml.v3",
 		outDirRelativeToPackageRoot + "/" + "proto",
 	}
 	if wrapperTypeIncluded {
-		imports = append(imports, "github.com/golang/protobuf/ptypes/wrappers")
+		imports = append(imports, "google.golang.org/protobuf/types/known/wrapperspb")
 	}
 	main := generateMainFile("main", License, extMainCode, imports)
 	mainFileName := path.Join(outDir, "main.go")

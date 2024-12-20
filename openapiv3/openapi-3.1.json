@@ -88,7 +88,7 @@
         },
         "summary": {
           "type": "string"
-        },
+        }
       }
     },
     "contact": {
@@ -706,6 +706,12 @@
       "additionalProperties": false,
       "properties": {
         "$ref": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "description": {
           "type": "string"
         }
       }

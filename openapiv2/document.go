@@ -14,7 +14,11 @@
 
 package openapi_v2
 
-import "github.com/googleapis/gnostic/compiler"
+import (
+	"errors"
+
+	"github.com/google/gnostic/compiler"
+)
 
 // ParseDocument reads an OpenAPI v2 description from a YAML/JSON representation.
 func ParseDocument(b []byte) (*Document, error) {
@@ -22,5 +26,11 @@ func ParseDocument(b []byte) (*Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewDocument(info.Content[0], compiler.NewContextWithExtensions("$root", nil, nil))
+
+	if len(info.Content) < 1 {
+		return nil, errors.New("document has no content")
+	}
+
+	root := info.Content[0]
+	return NewDocument(root, compiler.NewContextWithExtensions("$root", root, nil, nil))
 }

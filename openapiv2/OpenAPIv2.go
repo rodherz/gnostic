@@ -18,10 +18,12 @@ package openapi_v2
 
 import (
 	"fmt"
-	"github.com/googleapis/gnostic/compiler"
-	"gopkg.in/yaml.v3"
 	"regexp"
 	"strings"
+
+	"gopkg.in/yaml.v3"
+
+	"github.com/google/gnostic/compiler"
 )
 
 // Version returns the package name (and OpenAPI version).
@@ -39,7 +41,7 @@ func NewAdditionalPropertiesItem(in *yaml.Node, context *compiler.Context) (*Add
 		m, ok := compiler.UnpackMap(in)
 		if ok {
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewSchema(m, compiler.NewContext("schema", context))
+			t, matchingError := NewSchema(m, compiler.NewContext("schema", m, context))
 			if matchingError == nil {
 				x.Oneof = &AdditionalPropertiesItem_Schema{Schema: t}
 				matched = true
@@ -57,6 +59,10 @@ func NewAdditionalPropertiesItem(in *yaml.Node, context *compiler.Context) (*Add
 	if matched {
 		// since the oneof matched one of its possibilities, discard any matching errors
 		errors = make([]error, 0)
+	} else {
+		message := fmt.Sprintf("contains an invalid AdditionalPropertiesItem")
+		err := compiler.NewError(context, message)
+		errors = []error{err}
 	}
 	return x, compiler.NewErrorGroupOrNil(errors)
 }
@@ -162,7 +168,7 @@ func NewApiKeySecurity(in *yaml.Node, context *compiler.Context) (*ApiKeySecurit
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -243,7 +249,7 @@ func NewBasicAuthenticationSecurity(in *yaml.Node, context *compiler.Context) (*
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -324,7 +330,7 @@ func NewBodyParameter(in *yaml.Node, context *compiler.Context) (*BodyParameter,
 		v5 := compiler.MapValueForKey(m, "schema")
 		if v5 != nil {
 			var err error
-			x.Schema, err = NewSchema(v5, compiler.NewContext("schema", context))
+			x.Schema, err = NewSchema(v5, compiler.NewContext("schema", v5, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -351,7 +357,7 @@ func NewBodyParameter(in *yaml.Node, context *compiler.Context) (*BodyParameter,
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -429,7 +435,7 @@ func NewContact(in *yaml.Node, context *compiler.Context) (*Contact, error) {
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -472,7 +478,7 @@ func NewDefault(in *yaml.Node, context *compiler.Context) (*Default, error) {
 						pair.Value = result
 					}
 				} else {
-					pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+					pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -503,7 +509,7 @@ func NewDefinitions(in *yaml.Node, context *compiler.Context) (*Definitions, err
 				pair := &NamedSchema{}
 				pair.Name = k
 				var err error
-				pair.Value, err = NewSchema(v, compiler.NewContext(k, context))
+				pair.Value, err = NewSchema(v, compiler.NewContext(k, v, context))
 				if err != nil {
 					errors = append(errors, err)
 				}
@@ -555,7 +561,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 		v2 := compiler.MapValueForKey(m, "info")
 		if v2 != nil {
 			var err error
-			x.Info, err = NewInfo(v2, compiler.NewContext("info", context))
+			x.Info, err = NewInfo(v2, compiler.NewContext("info", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -621,7 +627,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 		v8 := compiler.MapValueForKey(m, "paths")
 		if v8 != nil {
 			var err error
-			x.Paths, err = NewPaths(v8, compiler.NewContext("paths", context))
+			x.Paths, err = NewPaths(v8, compiler.NewContext("paths", v8, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -630,7 +636,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 		v9 := compiler.MapValueForKey(m, "definitions")
 		if v9 != nil {
 			var err error
-			x.Definitions, err = NewDefinitions(v9, compiler.NewContext("definitions", context))
+			x.Definitions, err = NewDefinitions(v9, compiler.NewContext("definitions", v9, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -639,7 +645,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 		v10 := compiler.MapValueForKey(m, "parameters")
 		if v10 != nil {
 			var err error
-			x.Parameters, err = NewParameterDefinitions(v10, compiler.NewContext("parameters", context))
+			x.Parameters, err = NewParameterDefinitions(v10, compiler.NewContext("parameters", v10, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -648,7 +654,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 		v11 := compiler.MapValueForKey(m, "responses")
 		if v11 != nil {
 			var err error
-			x.Responses, err = NewResponseDefinitions(v11, compiler.NewContext("responses", context))
+			x.Responses, err = NewResponseDefinitions(v11, compiler.NewContext("responses", v11, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -661,7 +667,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 			a, ok := compiler.SequenceNodeForNode(v12)
 			if ok {
 				for _, item := range a.Content {
-					y, err := NewSecurityRequirement(item, compiler.NewContext("security", context))
+					y, err := NewSecurityRequirement(item, compiler.NewContext("security", item, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -673,7 +679,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 		v13 := compiler.MapValueForKey(m, "securityDefinitions")
 		if v13 != nil {
 			var err error
-			x.SecurityDefinitions, err = NewSecurityDefinitions(v13, compiler.NewContext("securityDefinitions", context))
+			x.SecurityDefinitions, err = NewSecurityDefinitions(v13, compiler.NewContext("securityDefinitions", v13, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -686,7 +692,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 			a, ok := compiler.SequenceNodeForNode(v14)
 			if ok {
 				for _, item := range a.Content {
-					y, err := NewTag(item, compiler.NewContext("tags", context))
+					y, err := NewTag(item, compiler.NewContext("tags", item, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -698,7 +704,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 		v15 := compiler.MapValueForKey(m, "externalDocs")
 		if v15 != nil {
 			var err error
-			x.ExternalDocs, err = NewExternalDocs(v15, compiler.NewContext("externalDocs", context))
+			x.ExternalDocs, err = NewExternalDocs(v15, compiler.NewContext("externalDocs", v15, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -725,7 +731,7 @@ func NewDocument(in *yaml.Node, context *compiler.Context) (*Document, error) {
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -768,7 +774,7 @@ func NewExamples(in *yaml.Node, context *compiler.Context) (*Examples, error) {
 						pair.Value = result
 					}
 				} else {
-					pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+					pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -842,7 +848,7 @@ func NewExternalDocs(in *yaml.Node, context *compiler.Context) (*ExternalDocs, e
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -908,7 +914,7 @@ func NewFileSchema(in *yaml.Node, context *compiler.Context) (*FileSchema, error
 		v4 := compiler.MapValueForKey(m, "default")
 		if v4 != nil {
 			var err error
-			x.Default, err = NewAny(v4, compiler.NewContext("default", context))
+			x.Default, err = NewAny(v4, compiler.NewContext("default", v4, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -952,7 +958,7 @@ func NewFileSchema(in *yaml.Node, context *compiler.Context) (*FileSchema, error
 		v8 := compiler.MapValueForKey(m, "externalDocs")
 		if v8 != nil {
 			var err error
-			x.ExternalDocs, err = NewExternalDocs(v8, compiler.NewContext("externalDocs", context))
+			x.ExternalDocs, err = NewExternalDocs(v8, compiler.NewContext("externalDocs", v8, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -961,7 +967,7 @@ func NewFileSchema(in *yaml.Node, context *compiler.Context) (*FileSchema, error
 		v9 := compiler.MapValueForKey(m, "example")
 		if v9 != nil {
 			var err error
-			x.Example, err = NewAny(v9, compiler.NewContext("example", context))
+			x.Example, err = NewAny(v9, compiler.NewContext("example", v9, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -988,7 +994,7 @@ func NewFileSchema(in *yaml.Node, context *compiler.Context) (*FileSchema, error
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -1096,7 +1102,7 @@ func NewFormDataParameterSubSchema(in *yaml.Node, context *compiler.Context) (*F
 		v8 := compiler.MapValueForKey(m, "items")
 		if v8 != nil {
 			var err error
-			x.Items, err = NewPrimitivesItems(v8, compiler.NewContext("items", context))
+			x.Items, err = NewPrimitivesItems(v8, compiler.NewContext("items", v8, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1120,7 +1126,7 @@ func NewFormDataParameterSubSchema(in *yaml.Node, context *compiler.Context) (*F
 		v10 := compiler.MapValueForKey(m, "default")
 		if v10 != nil {
 			var err error
-			x.Default, err = NewAny(v10, compiler.NewContext("default", context))
+			x.Default, err = NewAny(v10, compiler.NewContext("default", v10, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1235,7 +1241,7 @@ func NewFormDataParameterSubSchema(in *yaml.Node, context *compiler.Context) (*F
 			a, ok := compiler.SequenceNodeForNode(v21)
 			if ok {
 				for _, item := range a.Content {
-					y, err := NewAny(item, compiler.NewContext("enum", context))
+					y, err := NewAny(item, compiler.NewContext("enum", item, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -1276,7 +1282,7 @@ func NewFormDataParameterSubSchema(in *yaml.Node, context *compiler.Context) (*F
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -1339,7 +1345,7 @@ func NewHeader(in *yaml.Node, context *compiler.Context) (*Header, error) {
 		v3 := compiler.MapValueForKey(m, "items")
 		if v3 != nil {
 			var err error
-			x.Items, err = NewPrimitivesItems(v3, compiler.NewContext("items", context))
+			x.Items, err = NewPrimitivesItems(v3, compiler.NewContext("items", v3, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1363,7 +1369,7 @@ func NewHeader(in *yaml.Node, context *compiler.Context) (*Header, error) {
 		v5 := compiler.MapValueForKey(m, "default")
 		if v5 != nil {
 			var err error
-			x.Default, err = NewAny(v5, compiler.NewContext("default", context))
+			x.Default, err = NewAny(v5, compiler.NewContext("default", v5, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1478,7 +1484,7 @@ func NewHeader(in *yaml.Node, context *compiler.Context) (*Header, error) {
 			a, ok := compiler.SequenceNodeForNode(v16)
 			if ok {
 				for _, item := range a.Content {
-					y, err := NewAny(item, compiler.NewContext("enum", context))
+					y, err := NewAny(item, compiler.NewContext("enum", item, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -1528,7 +1534,7 @@ func NewHeader(in *yaml.Node, context *compiler.Context) (*Header, error) {
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -1627,7 +1633,7 @@ func NewHeaderParameterSubSchema(in *yaml.Node, context *compiler.Context) (*Hea
 		v7 := compiler.MapValueForKey(m, "items")
 		if v7 != nil {
 			var err error
-			x.Items, err = NewPrimitivesItems(v7, compiler.NewContext("items", context))
+			x.Items, err = NewPrimitivesItems(v7, compiler.NewContext("items", v7, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1651,7 +1657,7 @@ func NewHeaderParameterSubSchema(in *yaml.Node, context *compiler.Context) (*Hea
 		v9 := compiler.MapValueForKey(m, "default")
 		if v9 != nil {
 			var err error
-			x.Default, err = NewAny(v9, compiler.NewContext("default", context))
+			x.Default, err = NewAny(v9, compiler.NewContext("default", v9, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1766,7 +1772,7 @@ func NewHeaderParameterSubSchema(in *yaml.Node, context *compiler.Context) (*Hea
 			a, ok := compiler.SequenceNodeForNode(v20)
 			if ok {
 				for _, item := range a.Content {
-					y, err := NewAny(item, compiler.NewContext("enum", context))
+					y, err := NewAny(item, compiler.NewContext("enum", item, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -1807,7 +1813,7 @@ func NewHeaderParameterSubSchema(in *yaml.Node, context *compiler.Context) (*Hea
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -1839,7 +1845,7 @@ func NewHeaders(in *yaml.Node, context *compiler.Context) (*Headers, error) {
 				pair := &NamedHeader{}
 				pair.Name = k
 				var err error
-				pair.Value, err = NewHeader(v, compiler.NewContext(k, context))
+				pair.Value, err = NewHeader(v, compiler.NewContext(k, v, context))
 				if err != nil {
 					errors = append(errors, err)
 				}
@@ -1912,7 +1918,7 @@ func NewInfo(in *yaml.Node, context *compiler.Context) (*Info, error) {
 		v5 := compiler.MapValueForKey(m, "contact")
 		if v5 != nil {
 			var err error
-			x.Contact, err = NewContact(v5, compiler.NewContext("contact", context))
+			x.Contact, err = NewContact(v5, compiler.NewContext("contact", v5, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1921,7 +1927,7 @@ func NewInfo(in *yaml.Node, context *compiler.Context) (*Info, error) {
 		v6 := compiler.MapValueForKey(m, "license")
 		if v6 != nil {
 			var err error
-			x.License, err = NewLicense(v6, compiler.NewContext("license", context))
+			x.License, err = NewLicense(v6, compiler.NewContext("license", v6, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -1948,7 +1954,7 @@ func NewInfo(in *yaml.Node, context *compiler.Context) (*Info, error) {
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -1971,7 +1977,7 @@ func NewItemsItem(in *yaml.Node, context *compiler.Context) (*ItemsItem, error) 
 		errors = append(errors, compiler.NewError(context, message))
 	} else {
 		x.Schema = make([]*Schema, 0)
-		y, err := NewSchema(m, compiler.NewContext("<array>", context))
+		y, err := NewSchema(m, compiler.NewContext("<array>", m, context))
 		if err != nil {
 			return nil, err
 		}
@@ -2079,7 +2085,7 @@ func NewLicense(in *yaml.Node, context *compiler.Context) (*License, error) {
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -2121,7 +2127,7 @@ func NewNamedAny(in *yaml.Node, context *compiler.Context) (*NamedAny, error) {
 		v2 := compiler.MapValueForKey(m, "value")
 		if v2 != nil {
 			var err error
-			x.Value, err = NewAny(v2, compiler.NewContext("value", context))
+			x.Value, err = NewAny(v2, compiler.NewContext("value", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -2159,7 +2165,7 @@ func NewNamedHeader(in *yaml.Node, context *compiler.Context) (*NamedHeader, err
 		v2 := compiler.MapValueForKey(m, "value")
 		if v2 != nil {
 			var err error
-			x.Value, err = NewHeader(v2, compiler.NewContext("value", context))
+			x.Value, err = NewHeader(v2, compiler.NewContext("value", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -2197,7 +2203,7 @@ func NewNamedParameter(in *yaml.Node, context *compiler.Context) (*NamedParamete
 		v2 := compiler.MapValueForKey(m, "value")
 		if v2 != nil {
 			var err error
-			x.Value, err = NewParameter(v2, compiler.NewContext("value", context))
+			x.Value, err = NewParameter(v2, compiler.NewContext("value", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -2235,7 +2241,7 @@ func NewNamedPathItem(in *yaml.Node, context *compiler.Context) (*NamedPathItem,
 		v2 := compiler.MapValueForKey(m, "value")
 		if v2 != nil {
 			var err error
-			x.Value, err = NewPathItem(v2, compiler.NewContext("value", context))
+			x.Value, err = NewPathItem(v2, compiler.NewContext("value", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -2273,7 +2279,7 @@ func NewNamedResponse(in *yaml.Node, context *compiler.Context) (*NamedResponse,
 		v2 := compiler.MapValueForKey(m, "value")
 		if v2 != nil {
 			var err error
-			x.Value, err = NewResponse(v2, compiler.NewContext("value", context))
+			x.Value, err = NewResponse(v2, compiler.NewContext("value", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -2311,7 +2317,7 @@ func NewNamedResponseValue(in *yaml.Node, context *compiler.Context) (*NamedResp
 		v2 := compiler.MapValueForKey(m, "value")
 		if v2 != nil {
 			var err error
-			x.Value, err = NewResponseValue(v2, compiler.NewContext("value", context))
+			x.Value, err = NewResponseValue(v2, compiler.NewContext("value", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -2349,7 +2355,7 @@ func NewNamedSchema(in *yaml.Node, context *compiler.Context) (*NamedSchema, err
 		v2 := compiler.MapValueForKey(m, "value")
 		if v2 != nil {
 			var err error
-			x.Value, err = NewSchema(v2, compiler.NewContext("value", context))
+			x.Value, err = NewSchema(v2, compiler.NewContext("value", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -2387,7 +2393,7 @@ func NewNamedSecurityDefinitionsItem(in *yaml.Node, context *compiler.Context) (
 		v2 := compiler.MapValueForKey(m, "value")
 		if v2 != nil {
 			var err error
-			x.Value, err = NewSecurityDefinitionsItem(v2, compiler.NewContext("value", context))
+			x.Value, err = NewSecurityDefinitionsItem(v2, compiler.NewContext("value", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -2463,7 +2469,7 @@ func NewNamedStringArray(in *yaml.Node, context *compiler.Context) (*NamedString
 		v2 := compiler.MapValueForKey(m, "value")
 		if v2 != nil {
 			var err error
-			x.Value, err = NewStringArray(v2, compiler.NewContext("value", context))
+			x.Value, err = NewStringArray(v2, compiler.NewContext("value", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -2491,7 +2497,7 @@ func NewNonBodyParameter(in *yaml.Node, context *compiler.Context) (*NonBodyPara
 		// HeaderParameterSubSchema header_parameter_sub_schema = 1;
 		{
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewHeaderParameterSubSchema(m, compiler.NewContext("headerParameterSubSchema", context))
+			t, matchingError := NewHeaderParameterSubSchema(m, compiler.NewContext("headerParameterSubSchema", m, context))
 			if matchingError == nil {
 				x.Oneof = &NonBodyParameter_HeaderParameterSubSchema{HeaderParameterSubSchema: t}
 				matched = true
@@ -2502,7 +2508,7 @@ func NewNonBodyParameter(in *yaml.Node, context *compiler.Context) (*NonBodyPara
 		// FormDataParameterSubSchema form_data_parameter_sub_schema = 2;
 		{
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewFormDataParameterSubSchema(m, compiler.NewContext("formDataParameterSubSchema", context))
+			t, matchingError := NewFormDataParameterSubSchema(m, compiler.NewContext("formDataParameterSubSchema", m, context))
 			if matchingError == nil {
 				x.Oneof = &NonBodyParameter_FormDataParameterSubSchema{FormDataParameterSubSchema: t}
 				matched = true
@@ -2513,7 +2519,7 @@ func NewNonBodyParameter(in *yaml.Node, context *compiler.Context) (*NonBodyPara
 		// QueryParameterSubSchema query_parameter_sub_schema = 3;
 		{
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewQueryParameterSubSchema(m, compiler.NewContext("queryParameterSubSchema", context))
+			t, matchingError := NewQueryParameterSubSchema(m, compiler.NewContext("queryParameterSubSchema", m, context))
 			if matchingError == nil {
 				x.Oneof = &NonBodyParameter_QueryParameterSubSchema{QueryParameterSubSchema: t}
 				matched = true
@@ -2524,7 +2530,7 @@ func NewNonBodyParameter(in *yaml.Node, context *compiler.Context) (*NonBodyPara
 		// PathParameterSubSchema path_parameter_sub_schema = 4;
 		{
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewPathParameterSubSchema(m, compiler.NewContext("pathParameterSubSchema", context))
+			t, matchingError := NewPathParameterSubSchema(m, compiler.NewContext("pathParameterSubSchema", m, context))
 			if matchingError == nil {
 				x.Oneof = &NonBodyParameter_PathParameterSubSchema{PathParameterSubSchema: t}
 				matched = true
@@ -2536,6 +2542,10 @@ func NewNonBodyParameter(in *yaml.Node, context *compiler.Context) (*NonBodyPara
 	if matched {
 		// since the oneof matched one of its possibilities, discard any matching errors
 		errors = make([]error, 0)
+	} else {
+		message := fmt.Sprintf("contains an invalid NonBodyParameter")
+		err := compiler.NewError(context, message)
+		errors = []error{err}
 	}
 	return x, compiler.NewErrorGroupOrNil(errors)
 }
@@ -2596,7 +2606,7 @@ func NewOauth2AccessCodeSecurity(in *yaml.Node, context *compiler.Context) (*Oau
 		v3 := compiler.MapValueForKey(m, "scopes")
 		if v3 != nil {
 			var err error
-			x.Scopes, err = NewOauth2Scopes(v3, compiler.NewContext("scopes", context))
+			x.Scopes, err = NewOauth2Scopes(v3, compiler.NewContext("scopes", v3, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -2650,7 +2660,7 @@ func NewOauth2AccessCodeSecurity(in *yaml.Node, context *compiler.Context) (*Oau
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -2719,7 +2729,7 @@ func NewOauth2ApplicationSecurity(in *yaml.Node, context *compiler.Context) (*Oa
 		v3 := compiler.MapValueForKey(m, "scopes")
 		if v3 != nil {
 			var err error
-			x.Scopes, err = NewOauth2Scopes(v3, compiler.NewContext("scopes", context))
+			x.Scopes, err = NewOauth2Scopes(v3, compiler.NewContext("scopes", v3, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -2764,7 +2774,7 @@ func NewOauth2ApplicationSecurity(in *yaml.Node, context *compiler.Context) (*Oa
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -2833,7 +2843,7 @@ func NewOauth2ImplicitSecurity(in *yaml.Node, context *compiler.Context) (*Oauth
 		v3 := compiler.MapValueForKey(m, "scopes")
 		if v3 != nil {
 			var err error
-			x.Scopes, err = NewOauth2Scopes(v3, compiler.NewContext("scopes", context))
+			x.Scopes, err = NewOauth2Scopes(v3, compiler.NewContext("scopes", v3, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -2878,7 +2888,7 @@ func NewOauth2ImplicitSecurity(in *yaml.Node, context *compiler.Context) (*Oauth
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -2947,7 +2957,7 @@ func NewOauth2PasswordSecurity(in *yaml.Node, context *compiler.Context) (*Oauth
 		v3 := compiler.MapValueForKey(m, "scopes")
 		if v3 != nil {
 			var err error
-			x.Scopes, err = NewOauth2Scopes(v3, compiler.NewContext("scopes", context))
+			x.Scopes, err = NewOauth2Scopes(v3, compiler.NewContext("scopes", v3, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -2992,7 +3002,7 @@ func NewOauth2PasswordSecurity(in *yaml.Node, context *compiler.Context) (*Oauth
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -3086,7 +3096,7 @@ func NewOperation(in *yaml.Node, context *compiler.Context) (*Operation, error) 
 		v4 := compiler.MapValueForKey(m, "externalDocs")
 		if v4 != nil {
 			var err error
-			x.ExternalDocs, err = NewExternalDocs(v4, compiler.NewContext("externalDocs", context))
+			x.ExternalDocs, err = NewExternalDocs(v4, compiler.NewContext("externalDocs", v4, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -3130,7 +3140,7 @@ func NewOperation(in *yaml.Node, context *compiler.Context) (*Operation, error) 
 			a, ok := compiler.SequenceNodeForNode(v8)
 			if ok {
 				for _, item := range a.Content {
-					y, err := NewParametersItem(item, compiler.NewContext("parameters", context))
+					y, err := NewParametersItem(item, compiler.NewContext("parameters", item, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -3142,7 +3152,7 @@ func NewOperation(in *yaml.Node, context *compiler.Context) (*Operation, error) 
 		v9 := compiler.MapValueForKey(m, "responses")
 		if v9 != nil {
 			var err error
-			x.Responses, err = NewResponses(v9, compiler.NewContext("responses", context))
+			x.Responses, err = NewResponses(v9, compiler.NewContext("responses", v9, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -3181,7 +3191,7 @@ func NewOperation(in *yaml.Node, context *compiler.Context) (*Operation, error) 
 			a, ok := compiler.SequenceNodeForNode(v12)
 			if ok {
 				for _, item := range a.Content {
-					y, err := NewSecurityRequirement(item, compiler.NewContext("security", context))
+					y, err := NewSecurityRequirement(item, compiler.NewContext("security", item, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -3211,7 +3221,7 @@ func NewOperation(in *yaml.Node, context *compiler.Context) (*Operation, error) 
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -3234,7 +3244,7 @@ func NewParameter(in *yaml.Node, context *compiler.Context) (*Parameter, error) 
 		m, ok := compiler.UnpackMap(in)
 		if ok {
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewBodyParameter(m, compiler.NewContext("bodyParameter", context))
+			t, matchingError := NewBodyParameter(m, compiler.NewContext("bodyParameter", m, context))
 			if matchingError == nil {
 				x.Oneof = &Parameter_BodyParameter{BodyParameter: t}
 				matched = true
@@ -3248,7 +3258,7 @@ func NewParameter(in *yaml.Node, context *compiler.Context) (*Parameter, error) 
 		m, ok := compiler.UnpackMap(in)
 		if ok {
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewNonBodyParameter(m, compiler.NewContext("nonBodyParameter", context))
+			t, matchingError := NewNonBodyParameter(m, compiler.NewContext("nonBodyParameter", m, context))
 			if matchingError == nil {
 				x.Oneof = &Parameter_NonBodyParameter{NonBodyParameter: t}
 				matched = true
@@ -3260,6 +3270,10 @@ func NewParameter(in *yaml.Node, context *compiler.Context) (*Parameter, error) 
 	if matched {
 		// since the oneof matched one of its possibilities, discard any matching errors
 		errors = make([]error, 0)
+	} else {
+		message := fmt.Sprintf("contains an invalid Parameter")
+		err := compiler.NewError(context, message)
+		errors = []error{err}
 	}
 	return x, compiler.NewErrorGroupOrNil(errors)
 }
@@ -3283,7 +3297,7 @@ func NewParameterDefinitions(in *yaml.Node, context *compiler.Context) (*Paramet
 				pair := &NamedParameter{}
 				pair.Name = k
 				var err error
-				pair.Value, err = NewParameter(v, compiler.NewContext(k, context))
+				pair.Value, err = NewParameter(v, compiler.NewContext(k, v, context))
 				if err != nil {
 					errors = append(errors, err)
 				}
@@ -3304,7 +3318,7 @@ func NewParametersItem(in *yaml.Node, context *compiler.Context) (*ParametersIte
 		m, ok := compiler.UnpackMap(in)
 		if ok {
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewParameter(m, compiler.NewContext("parameter", context))
+			t, matchingError := NewParameter(m, compiler.NewContext("parameter", m, context))
 			if matchingError == nil {
 				x.Oneof = &ParametersItem_Parameter{Parameter: t}
 				matched = true
@@ -3318,7 +3332,7 @@ func NewParametersItem(in *yaml.Node, context *compiler.Context) (*ParametersIte
 		m, ok := compiler.UnpackMap(in)
 		if ok {
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewJsonReference(m, compiler.NewContext("jsonReference", context))
+			t, matchingError := NewJsonReference(m, compiler.NewContext("jsonReference", m, context))
 			if matchingError == nil {
 				x.Oneof = &ParametersItem_JsonReference{JsonReference: t}
 				matched = true
@@ -3330,6 +3344,10 @@ func NewParametersItem(in *yaml.Node, context *compiler.Context) (*ParametersIte
 	if matched {
 		// since the oneof matched one of its possibilities, discard any matching errors
 		errors = make([]error, 0)
+	} else {
+		message := fmt.Sprintf("contains an invalid ParametersItem")
+		err := compiler.NewError(context, message)
+		errors = []error{err}
 	}
 	return x, compiler.NewErrorGroupOrNil(errors)
 }
@@ -3363,7 +3381,7 @@ func NewPathItem(in *yaml.Node, context *compiler.Context) (*PathItem, error) {
 		v2 := compiler.MapValueForKey(m, "get")
 		if v2 != nil {
 			var err error
-			x.Get, err = NewOperation(v2, compiler.NewContext("get", context))
+			x.Get, err = NewOperation(v2, compiler.NewContext("get", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -3372,7 +3390,7 @@ func NewPathItem(in *yaml.Node, context *compiler.Context) (*PathItem, error) {
 		v3 := compiler.MapValueForKey(m, "put")
 		if v3 != nil {
 			var err error
-			x.Put, err = NewOperation(v3, compiler.NewContext("put", context))
+			x.Put, err = NewOperation(v3, compiler.NewContext("put", v3, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -3381,7 +3399,7 @@ func NewPathItem(in *yaml.Node, context *compiler.Context) (*PathItem, error) {
 		v4 := compiler.MapValueForKey(m, "post")
 		if v4 != nil {
 			var err error
-			x.Post, err = NewOperation(v4, compiler.NewContext("post", context))
+			x.Post, err = NewOperation(v4, compiler.NewContext("post", v4, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -3390,7 +3408,7 @@ func NewPathItem(in *yaml.Node, context *compiler.Context) (*PathItem, error) {
 		v5 := compiler.MapValueForKey(m, "delete")
 		if v5 != nil {
 			var err error
-			x.Delete, err = NewOperation(v5, compiler.NewContext("delete", context))
+			x.Delete, err = NewOperation(v5, compiler.NewContext("delete", v5, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -3399,7 +3417,7 @@ func NewPathItem(in *yaml.Node, context *compiler.Context) (*PathItem, error) {
 		v6 := compiler.MapValueForKey(m, "options")
 		if v6 != nil {
 			var err error
-			x.Options, err = NewOperation(v6, compiler.NewContext("options", context))
+			x.Options, err = NewOperation(v6, compiler.NewContext("options", v6, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -3408,7 +3426,7 @@ func NewPathItem(in *yaml.Node, context *compiler.Context) (*PathItem, error) {
 		v7 := compiler.MapValueForKey(m, "head")
 		if v7 != nil {
 			var err error
-			x.Head, err = NewOperation(v7, compiler.NewContext("head", context))
+			x.Head, err = NewOperation(v7, compiler.NewContext("head", v7, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -3417,7 +3435,7 @@ func NewPathItem(in *yaml.Node, context *compiler.Context) (*PathItem, error) {
 		v8 := compiler.MapValueForKey(m, "patch")
 		if v8 != nil {
 			var err error
-			x.Patch, err = NewOperation(v8, compiler.NewContext("patch", context))
+			x.Patch, err = NewOperation(v8, compiler.NewContext("patch", v8, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -3430,7 +3448,7 @@ func NewPathItem(in *yaml.Node, context *compiler.Context) (*PathItem, error) {
 			a, ok := compiler.SequenceNodeForNode(v9)
 			if ok {
 				for _, item := range a.Content {
-					y, err := NewParametersItem(item, compiler.NewContext("parameters", context))
+					y, err := NewParametersItem(item, compiler.NewContext("parameters", item, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -3460,7 +3478,7 @@ func NewPathItem(in *yaml.Node, context *compiler.Context) (*PathItem, error) {
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -3565,7 +3583,7 @@ func NewPathParameterSubSchema(in *yaml.Node, context *compiler.Context) (*PathP
 		v7 := compiler.MapValueForKey(m, "items")
 		if v7 != nil {
 			var err error
-			x.Items, err = NewPrimitivesItems(v7, compiler.NewContext("items", context))
+			x.Items, err = NewPrimitivesItems(v7, compiler.NewContext("items", v7, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -3589,7 +3607,7 @@ func NewPathParameterSubSchema(in *yaml.Node, context *compiler.Context) (*PathP
 		v9 := compiler.MapValueForKey(m, "default")
 		if v9 != nil {
 			var err error
-			x.Default, err = NewAny(v9, compiler.NewContext("default", context))
+			x.Default, err = NewAny(v9, compiler.NewContext("default", v9, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -3704,7 +3722,7 @@ func NewPathParameterSubSchema(in *yaml.Node, context *compiler.Context) (*PathP
 			a, ok := compiler.SequenceNodeForNode(v20)
 			if ok {
 				for _, item := range a.Content {
-					y, err := NewAny(item, compiler.NewContext("enum", context))
+					y, err := NewAny(item, compiler.NewContext("enum", item, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -3745,7 +3763,7 @@ func NewPathParameterSubSchema(in *yaml.Node, context *compiler.Context) (*PathP
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -3796,7 +3814,7 @@ func NewPaths(in *yaml.Node, context *compiler.Context) (*Paths, error) {
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -3816,7 +3834,7 @@ func NewPaths(in *yaml.Node, context *compiler.Context) (*Paths, error) {
 					pair := &NamedPathItem{}
 					pair.Name = k
 					var err error
-					pair.Value, err = NewPathItem(v, compiler.NewContext(k, context))
+					pair.Value, err = NewPathItem(v, compiler.NewContext(k, v, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -3872,7 +3890,7 @@ func NewPrimitivesItems(in *yaml.Node, context *compiler.Context) (*PrimitivesIt
 		v3 := compiler.MapValueForKey(m, "items")
 		if v3 != nil {
 			var err error
-			x.Items, err = NewPrimitivesItems(v3, compiler.NewContext("items", context))
+			x.Items, err = NewPrimitivesItems(v3, compiler.NewContext("items", v3, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -3896,7 +3914,7 @@ func NewPrimitivesItems(in *yaml.Node, context *compiler.Context) (*PrimitivesIt
 		v5 := compiler.MapValueForKey(m, "default")
 		if v5 != nil {
 			var err error
-			x.Default, err = NewAny(v5, compiler.NewContext("default", context))
+			x.Default, err = NewAny(v5, compiler.NewContext("default", v5, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -4011,7 +4029,7 @@ func NewPrimitivesItems(in *yaml.Node, context *compiler.Context) (*PrimitivesIt
 			a, ok := compiler.SequenceNodeForNode(v16)
 			if ok {
 				for _, item := range a.Content {
-					y, err := NewAny(item, compiler.NewContext("enum", context))
+					y, err := NewAny(item, compiler.NewContext("enum", item, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -4052,7 +4070,7 @@ func NewPrimitivesItems(in *yaml.Node, context *compiler.Context) (*PrimitivesIt
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -4084,7 +4102,7 @@ func NewProperties(in *yaml.Node, context *compiler.Context) (*Properties, error
 				pair := &NamedSchema{}
 				pair.Name = k
 				var err error
-				pair.Value, err = NewSchema(v, compiler.NewContext(k, context))
+				pair.Value, err = NewSchema(v, compiler.NewContext(k, v, context))
 				if err != nil {
 					errors = append(errors, err)
 				}
@@ -4190,7 +4208,7 @@ func NewQueryParameterSubSchema(in *yaml.Node, context *compiler.Context) (*Quer
 		v8 := compiler.MapValueForKey(m, "items")
 		if v8 != nil {
 			var err error
-			x.Items, err = NewPrimitivesItems(v8, compiler.NewContext("items", context))
+			x.Items, err = NewPrimitivesItems(v8, compiler.NewContext("items", v8, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -4214,7 +4232,7 @@ func NewQueryParameterSubSchema(in *yaml.Node, context *compiler.Context) (*Quer
 		v10 := compiler.MapValueForKey(m, "default")
 		if v10 != nil {
 			var err error
-			x.Default, err = NewAny(v10, compiler.NewContext("default", context))
+			x.Default, err = NewAny(v10, compiler.NewContext("default", v10, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -4329,7 +4347,7 @@ func NewQueryParameterSubSchema(in *yaml.Node, context *compiler.Context) (*Quer
 			a, ok := compiler.SequenceNodeForNode(v21)
 			if ok {
 				for _, item := range a.Content {
-					y, err := NewAny(item, compiler.NewContext("enum", context))
+					y, err := NewAny(item, compiler.NewContext("enum", item, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -4370,7 +4388,7 @@ func NewQueryParameterSubSchema(in *yaml.Node, context *compiler.Context) (*Quer
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -4418,7 +4436,7 @@ func NewResponse(in *yaml.Node, context *compiler.Context) (*Response, error) {
 		v2 := compiler.MapValueForKey(m, "schema")
 		if v2 != nil {
 			var err error
-			x.Schema, err = NewSchemaItem(v2, compiler.NewContext("schema", context))
+			x.Schema, err = NewSchemaItem(v2, compiler.NewContext("schema", v2, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -4427,7 +4445,7 @@ func NewResponse(in *yaml.Node, context *compiler.Context) (*Response, error) {
 		v3 := compiler.MapValueForKey(m, "headers")
 		if v3 != nil {
 			var err error
-			x.Headers, err = NewHeaders(v3, compiler.NewContext("headers", context))
+			x.Headers, err = NewHeaders(v3, compiler.NewContext("headers", v3, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -4436,7 +4454,7 @@ func NewResponse(in *yaml.Node, context *compiler.Context) (*Response, error) {
 		v4 := compiler.MapValueForKey(m, "examples")
 		if v4 != nil {
 			var err error
-			x.Examples, err = NewExamples(v4, compiler.NewContext("examples", context))
+			x.Examples, err = NewExamples(v4, compiler.NewContext("examples", v4, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -4463,7 +4481,7 @@ func NewResponse(in *yaml.Node, context *compiler.Context) (*Response, error) {
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -4495,7 +4513,7 @@ func NewResponseDefinitions(in *yaml.Node, context *compiler.Context) (*Response
 				pair := &NamedResponse{}
 				pair.Name = k
 				var err error
-				pair.Value, err = NewResponse(v, compiler.NewContext(k, context))
+				pair.Value, err = NewResponse(v, compiler.NewContext(k, v, context))
 				if err != nil {
 					errors = append(errors, err)
 				}
@@ -4516,7 +4534,7 @@ func NewResponseValue(in *yaml.Node, context *compiler.Context) (*ResponseValue,
 		m, ok := compiler.UnpackMap(in)
 		if ok {
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewResponse(m, compiler.NewContext("response", context))
+			t, matchingError := NewResponse(m, compiler.NewContext("response", m, context))
 			if matchingError == nil {
 				x.Oneof = &ResponseValue_Response{Response: t}
 				matched = true
@@ -4530,7 +4548,7 @@ func NewResponseValue(in *yaml.Node, context *compiler.Context) (*ResponseValue,
 		m, ok := compiler.UnpackMap(in)
 		if ok {
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewJsonReference(m, compiler.NewContext("jsonReference", context))
+			t, matchingError := NewJsonReference(m, compiler.NewContext("jsonReference", m, context))
 			if matchingError == nil {
 				x.Oneof = &ResponseValue_JsonReference{JsonReference: t}
 				matched = true
@@ -4542,6 +4560,10 @@ func NewResponseValue(in *yaml.Node, context *compiler.Context) (*ResponseValue,
 	if matched {
 		// since the oneof matched one of its possibilities, discard any matching errors
 		errors = make([]error, 0)
+	} else {
+		message := fmt.Sprintf("contains an invalid ResponseValue")
+		err := compiler.NewError(context, message)
+		errors = []error{err}
 	}
 	return x, compiler.NewErrorGroupOrNil(errors)
 }
@@ -4573,7 +4595,7 @@ func NewResponses(in *yaml.Node, context *compiler.Context) (*Responses, error) 
 					pair := &NamedResponseValue{}
 					pair.Name = k
 					var err error
-					pair.Value, err = NewResponseValue(v, compiler.NewContext(k, context))
+					pair.Value, err = NewResponseValue(v, compiler.NewContext(k, v, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -4603,7 +4625,7 @@ func NewResponses(in *yaml.Node, context *compiler.Context) (*Responses, error) 
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -4672,7 +4694,7 @@ func NewSchema(in *yaml.Node, context *compiler.Context) (*Schema, error) {
 		v5 := compiler.MapValueForKey(m, "default")
 		if v5 != nil {
 			var err error
-			x.Default, err = NewAny(v5, compiler.NewContext("default", context))
+			x.Default, err = NewAny(v5, compiler.NewContext("default", v5, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -4831,7 +4853,7 @@ func NewSchema(in *yaml.Node, context *compiler.Context) (*Schema, error) {
 			a, ok := compiler.SequenceNodeForNode(v20)
 			if ok {
 				for _, item := range a.Content {
-					y, err := NewAny(item, compiler.NewContext("enum", context))
+					y, err := NewAny(item, compiler.NewContext("enum", item, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -4843,7 +4865,7 @@ func NewSchema(in *yaml.Node, context *compiler.Context) (*Schema, error) {
 		v21 := compiler.MapValueForKey(m, "additionalProperties")
 		if v21 != nil {
 			var err error
-			x.AdditionalProperties, err = NewAdditionalPropertiesItem(v21, compiler.NewContext("additionalProperties", context))
+			x.AdditionalProperties, err = NewAdditionalPropertiesItem(v21, compiler.NewContext("additionalProperties", v21, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -4852,7 +4874,7 @@ func NewSchema(in *yaml.Node, context *compiler.Context) (*Schema, error) {
 		v22 := compiler.MapValueForKey(m, "type")
 		if v22 != nil {
 			var err error
-			x.Type, err = NewTypeItem(v22, compiler.NewContext("type", context))
+			x.Type, err = NewTypeItem(v22, compiler.NewContext("type", v22, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -4861,7 +4883,7 @@ func NewSchema(in *yaml.Node, context *compiler.Context) (*Schema, error) {
 		v23 := compiler.MapValueForKey(m, "items")
 		if v23 != nil {
 			var err error
-			x.Items, err = NewItemsItem(v23, compiler.NewContext("items", context))
+			x.Items, err = NewItemsItem(v23, compiler.NewContext("items", v23, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -4874,7 +4896,7 @@ func NewSchema(in *yaml.Node, context *compiler.Context) (*Schema, error) {
 			a, ok := compiler.SequenceNodeForNode(v24)
 			if ok {
 				for _, item := range a.Content {
-					y, err := NewSchema(item, compiler.NewContext("allOf", context))
+					y, err := NewSchema(item, compiler.NewContext("allOf", item, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -4886,7 +4908,7 @@ func NewSchema(in *yaml.Node, context *compiler.Context) (*Schema, error) {
 		v25 := compiler.MapValueForKey(m, "properties")
 		if v25 != nil {
 			var err error
-			x.Properties, err = NewProperties(v25, compiler.NewContext("properties", context))
+			x.Properties, err = NewProperties(v25, compiler.NewContext("properties", v25, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -4913,7 +4935,7 @@ func NewSchema(in *yaml.Node, context *compiler.Context) (*Schema, error) {
 		v28 := compiler.MapValueForKey(m, "xml")
 		if v28 != nil {
 			var err error
-			x.Xml, err = NewXml(v28, compiler.NewContext("xml", context))
+			x.Xml, err = NewXml(v28, compiler.NewContext("xml", v28, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -4922,7 +4944,7 @@ func NewSchema(in *yaml.Node, context *compiler.Context) (*Schema, error) {
 		v29 := compiler.MapValueForKey(m, "externalDocs")
 		if v29 != nil {
 			var err error
-			x.ExternalDocs, err = NewExternalDocs(v29, compiler.NewContext("externalDocs", context))
+			x.ExternalDocs, err = NewExternalDocs(v29, compiler.NewContext("externalDocs", v29, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -4931,7 +4953,7 @@ func NewSchema(in *yaml.Node, context *compiler.Context) (*Schema, error) {
 		v30 := compiler.MapValueForKey(m, "example")
 		if v30 != nil {
 			var err error
-			x.Example, err = NewAny(v30, compiler.NewContext("example", context))
+			x.Example, err = NewAny(v30, compiler.NewContext("example", v30, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -4958,7 +4980,7 @@ func NewSchema(in *yaml.Node, context *compiler.Context) (*Schema, error) {
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -4981,7 +5003,7 @@ func NewSchemaItem(in *yaml.Node, context *compiler.Context) (*SchemaItem, error
 		m, ok := compiler.UnpackMap(in)
 		if ok {
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewSchema(m, compiler.NewContext("schema", context))
+			t, matchingError := NewSchema(m, compiler.NewContext("schema", m, context))
 			if matchingError == nil {
 				x.Oneof = &SchemaItem_Schema{Schema: t}
 				matched = true
@@ -4995,7 +5017,7 @@ func NewSchemaItem(in *yaml.Node, context *compiler.Context) (*SchemaItem, error
 		m, ok := compiler.UnpackMap(in)
 		if ok {
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewFileSchema(m, compiler.NewContext("fileSchema", context))
+			t, matchingError := NewFileSchema(m, compiler.NewContext("fileSchema", m, context))
 			if matchingError == nil {
 				x.Oneof = &SchemaItem_FileSchema{FileSchema: t}
 				matched = true
@@ -5007,6 +5029,10 @@ func NewSchemaItem(in *yaml.Node, context *compiler.Context) (*SchemaItem, error
 	if matched {
 		// since the oneof matched one of its possibilities, discard any matching errors
 		errors = make([]error, 0)
+	} else {
+		message := fmt.Sprintf("contains an invalid SchemaItem")
+		err := compiler.NewError(context, message)
+		errors = []error{err}
 	}
 	return x, compiler.NewErrorGroupOrNil(errors)
 }
@@ -5030,7 +5056,7 @@ func NewSecurityDefinitions(in *yaml.Node, context *compiler.Context) (*Security
 				pair := &NamedSecurityDefinitionsItem{}
 				pair.Name = k
 				var err error
-				pair.Value, err = NewSecurityDefinitionsItem(v, compiler.NewContext(k, context))
+				pair.Value, err = NewSecurityDefinitionsItem(v, compiler.NewContext(k, v, context))
 				if err != nil {
 					errors = append(errors, err)
 				}
@@ -5051,7 +5077,7 @@ func NewSecurityDefinitionsItem(in *yaml.Node, context *compiler.Context) (*Secu
 		m, ok := compiler.UnpackMap(in)
 		if ok {
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewBasicAuthenticationSecurity(m, compiler.NewContext("basicAuthenticationSecurity", context))
+			t, matchingError := NewBasicAuthenticationSecurity(m, compiler.NewContext("basicAuthenticationSecurity", m, context))
 			if matchingError == nil {
 				x.Oneof = &SecurityDefinitionsItem_BasicAuthenticationSecurity{BasicAuthenticationSecurity: t}
 				matched = true
@@ -5065,7 +5091,7 @@ func NewSecurityDefinitionsItem(in *yaml.Node, context *compiler.Context) (*Secu
 		m, ok := compiler.UnpackMap(in)
 		if ok {
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewApiKeySecurity(m, compiler.NewContext("apiKeySecurity", context))
+			t, matchingError := NewApiKeySecurity(m, compiler.NewContext("apiKeySecurity", m, context))
 			if matchingError == nil {
 				x.Oneof = &SecurityDefinitionsItem_ApiKeySecurity{ApiKeySecurity: t}
 				matched = true
@@ -5079,7 +5105,7 @@ func NewSecurityDefinitionsItem(in *yaml.Node, context *compiler.Context) (*Secu
 		m, ok := compiler.UnpackMap(in)
 		if ok {
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewOauth2ImplicitSecurity(m, compiler.NewContext("oauth2ImplicitSecurity", context))
+			t, matchingError := NewOauth2ImplicitSecurity(m, compiler.NewContext("oauth2ImplicitSecurity", m, context))
 			if matchingError == nil {
 				x.Oneof = &SecurityDefinitionsItem_Oauth2ImplicitSecurity{Oauth2ImplicitSecurity: t}
 				matched = true
@@ -5093,7 +5119,7 @@ func NewSecurityDefinitionsItem(in *yaml.Node, context *compiler.Context) (*Secu
 		m, ok := compiler.UnpackMap(in)
 		if ok {
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewOauth2PasswordSecurity(m, compiler.NewContext("oauth2PasswordSecurity", context))
+			t, matchingError := NewOauth2PasswordSecurity(m, compiler.NewContext("oauth2PasswordSecurity", m, context))
 			if matchingError == nil {
 				x.Oneof = &SecurityDefinitionsItem_Oauth2PasswordSecurity{Oauth2PasswordSecurity: t}
 				matched = true
@@ -5107,7 +5133,7 @@ func NewSecurityDefinitionsItem(in *yaml.Node, context *compiler.Context) (*Secu
 		m, ok := compiler.UnpackMap(in)
 		if ok {
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewOauth2ApplicationSecurity(m, compiler.NewContext("oauth2ApplicationSecurity", context))
+			t, matchingError := NewOauth2ApplicationSecurity(m, compiler.NewContext("oauth2ApplicationSecurity", m, context))
 			if matchingError == nil {
 				x.Oneof = &SecurityDefinitionsItem_Oauth2ApplicationSecurity{Oauth2ApplicationSecurity: t}
 				matched = true
@@ -5121,7 +5147,7 @@ func NewSecurityDefinitionsItem(in *yaml.Node, context *compiler.Context) (*Secu
 		m, ok := compiler.UnpackMap(in)
 		if ok {
 			// errors might be ok here, they mean we just don't have the right subtype
-			t, matchingError := NewOauth2AccessCodeSecurity(m, compiler.NewContext("oauth2AccessCodeSecurity", context))
+			t, matchingError := NewOauth2AccessCodeSecurity(m, compiler.NewContext("oauth2AccessCodeSecurity", m, context))
 			if matchingError == nil {
 				x.Oneof = &SecurityDefinitionsItem_Oauth2AccessCodeSecurity{Oauth2AccessCodeSecurity: t}
 				matched = true
@@ -5133,6 +5159,10 @@ func NewSecurityDefinitionsItem(in *yaml.Node, context *compiler.Context) (*Secu
 	if matched {
 		// since the oneof matched one of its possibilities, discard any matching errors
 		errors = make([]error, 0)
+	} else {
+		message := fmt.Sprintf("contains an invalid SecurityDefinitionsItem")
+		err := compiler.NewError(context, message)
+		errors = []error{err}
 	}
 	return x, compiler.NewErrorGroupOrNil(errors)
 }
@@ -5156,7 +5186,7 @@ func NewSecurityRequirement(in *yaml.Node, context *compiler.Context) (*Security
 				pair := &NamedStringArray{}
 				pair.Name = k
 				var err error
-				pair.Value, err = NewStringArray(v, compiler.NewContext(k, context))
+				pair.Value, err = NewStringArray(v, compiler.NewContext(k, v, context))
 				if err != nil {
 					errors = append(errors, err)
 				}
@@ -5223,7 +5253,7 @@ func NewTag(in *yaml.Node, context *compiler.Context) (*Tag, error) {
 		v3 := compiler.MapValueForKey(m, "externalDocs")
 		if v3 != nil {
 			var err error
-			x.ExternalDocs, err = NewExternalDocs(v3, compiler.NewContext("externalDocs", context))
+			x.ExternalDocs, err = NewExternalDocs(v3, compiler.NewContext("externalDocs", v3, context))
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -5250,7 +5280,7 @@ func NewTag(in *yaml.Node, context *compiler.Context) (*Tag, error) {
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -5321,7 +5351,7 @@ func NewVendorExtension(in *yaml.Node, context *compiler.Context) (*VendorExtens
 						pair.Value = result
 					}
 				} else {
-					pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+					pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 					if err != nil {
 						errors = append(errors, err)
 					}
@@ -5416,7 +5446,7 @@ func NewXml(in *yaml.Node, context *compiler.Context) (*Xml, error) {
 							pair.Value = result
 						}
 					} else {
-						pair.Value, err = NewAny(v, compiler.NewContext(k, context))
+						pair.Value, err = NewAny(v, compiler.NewContext(k, v, context))
 						if err != nil {
 							errors = append(errors, err)
 						}
@@ -5427,3359 +5457,6 @@ func NewXml(in *yaml.Node, context *compiler.Context) (*Xml, error) {
 		}
 	}
 	return x, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside AdditionalPropertiesItem objects.
-func (m *AdditionalPropertiesItem) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	{
-		p, ok := m.Oneof.(*AdditionalPropertiesItem_Schema)
-		if ok {
-			_, err := p.Schema.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Any objects.
-func (m *Any) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside ApiKeySecurity objects.
-func (m *ApiKeySecurity) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside BasicAuthenticationSecurity objects.
-func (m *BasicAuthenticationSecurity) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside BodyParameter objects.
-func (m *BodyParameter) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Schema != nil {
-		_, err := m.Schema.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Contact objects.
-func (m *Contact) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Default objects.
-func (m *Default) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Definitions objects.
-func (m *Definitions) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Document objects.
-func (m *Document) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Info != nil {
-		_, err := m.Info.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Paths != nil {
-		_, err := m.Paths.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Definitions != nil {
-		_, err := m.Definitions.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Parameters != nil {
-		_, err := m.Parameters.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Responses != nil {
-		_, err := m.Responses.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.Security {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	if m.SecurityDefinitions != nil {
-		_, err := m.SecurityDefinitions.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.Tags {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	if m.ExternalDocs != nil {
-		_, err := m.ExternalDocs.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Examples objects.
-func (m *Examples) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside ExternalDocs objects.
-func (m *ExternalDocs) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside FileSchema objects.
-func (m *FileSchema) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Default != nil {
-		_, err := m.Default.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.ExternalDocs != nil {
-		_, err := m.ExternalDocs.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Example != nil {
-		_, err := m.Example.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside FormDataParameterSubSchema objects.
-func (m *FormDataParameterSubSchema) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Items != nil {
-		_, err := m.Items.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Default != nil {
-		_, err := m.Default.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.Enum {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Header objects.
-func (m *Header) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Items != nil {
-		_, err := m.Items.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Default != nil {
-		_, err := m.Default.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.Enum {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside HeaderParameterSubSchema objects.
-func (m *HeaderParameterSubSchema) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Items != nil {
-		_, err := m.Items.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Default != nil {
-		_, err := m.Default.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.Enum {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Headers objects.
-func (m *Headers) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Info objects.
-func (m *Info) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Contact != nil {
-		_, err := m.Contact.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.License != nil {
-		_, err := m.License.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside ItemsItem objects.
-func (m *ItemsItem) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.Schema {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside JsonReference objects.
-func (m *JsonReference) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.XRef != "" {
-		info, err := compiler.ReadInfoForRef(root, m.XRef)
-		if err != nil {
-			return nil, err
-		}
-		if info != nil {
-			replacement, err := NewJsonReference(info, nil)
-			if err == nil {
-				*m = *replacement
-				return m.ResolveReferences(root)
-			}
-		}
-		return info, nil
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside License objects.
-func (m *License) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NamedAny objects.
-func (m *NamedAny) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Value != nil {
-		_, err := m.Value.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NamedHeader objects.
-func (m *NamedHeader) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Value != nil {
-		_, err := m.Value.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NamedParameter objects.
-func (m *NamedParameter) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Value != nil {
-		_, err := m.Value.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NamedPathItem objects.
-func (m *NamedPathItem) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Value != nil {
-		_, err := m.Value.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NamedResponse objects.
-func (m *NamedResponse) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Value != nil {
-		_, err := m.Value.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NamedResponseValue objects.
-func (m *NamedResponseValue) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Value != nil {
-		_, err := m.Value.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NamedSchema objects.
-func (m *NamedSchema) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Value != nil {
-		_, err := m.Value.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NamedSecurityDefinitionsItem objects.
-func (m *NamedSecurityDefinitionsItem) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Value != nil {
-		_, err := m.Value.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NamedString objects.
-func (m *NamedString) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NamedStringArray objects.
-func (m *NamedStringArray) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Value != nil {
-		_, err := m.Value.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside NonBodyParameter objects.
-func (m *NonBodyParameter) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	{
-		p, ok := m.Oneof.(*NonBodyParameter_HeaderParameterSubSchema)
-		if ok {
-			_, err := p.HeaderParameterSubSchema.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	{
-		p, ok := m.Oneof.(*NonBodyParameter_FormDataParameterSubSchema)
-		if ok {
-			_, err := p.FormDataParameterSubSchema.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	{
-		p, ok := m.Oneof.(*NonBodyParameter_QueryParameterSubSchema)
-		if ok {
-			_, err := p.QueryParameterSubSchema.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	{
-		p, ok := m.Oneof.(*NonBodyParameter_PathParameterSubSchema)
-		if ok {
-			_, err := p.PathParameterSubSchema.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Oauth2AccessCodeSecurity objects.
-func (m *Oauth2AccessCodeSecurity) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Scopes != nil {
-		_, err := m.Scopes.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Oauth2ApplicationSecurity objects.
-func (m *Oauth2ApplicationSecurity) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Scopes != nil {
-		_, err := m.Scopes.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Oauth2ImplicitSecurity objects.
-func (m *Oauth2ImplicitSecurity) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Scopes != nil {
-		_, err := m.Scopes.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Oauth2PasswordSecurity objects.
-func (m *Oauth2PasswordSecurity) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Scopes != nil {
-		_, err := m.Scopes.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Oauth2Scopes objects.
-func (m *Oauth2Scopes) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Operation objects.
-func (m *Operation) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.ExternalDocs != nil {
-		_, err := m.ExternalDocs.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.Parameters {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	if m.Responses != nil {
-		_, err := m.Responses.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.Security {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Parameter objects.
-func (m *Parameter) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	{
-		p, ok := m.Oneof.(*Parameter_BodyParameter)
-		if ok {
-			_, err := p.BodyParameter.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	{
-		p, ok := m.Oneof.(*Parameter_NonBodyParameter)
-		if ok {
-			_, err := p.NonBodyParameter.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside ParameterDefinitions objects.
-func (m *ParameterDefinitions) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside ParametersItem objects.
-func (m *ParametersItem) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	{
-		p, ok := m.Oneof.(*ParametersItem_Parameter)
-		if ok {
-			_, err := p.Parameter.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	{
-		p, ok := m.Oneof.(*ParametersItem_JsonReference)
-		if ok {
-			info, err := p.JsonReference.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			} else if info != nil {
-				n, err := NewParametersItem(info, nil)
-				if err != nil {
-					return nil, err
-				} else if n != nil {
-					*m = *n
-					return nil, nil
-				}
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside PathItem objects.
-func (m *PathItem) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.XRef != "" {
-		info, err := compiler.ReadInfoForRef(root, m.XRef)
-		if err != nil {
-			return nil, err
-		}
-		if info != nil {
-			replacement, err := NewPathItem(info, nil)
-			if err == nil {
-				*m = *replacement
-				return m.ResolveReferences(root)
-			}
-		}
-		return info, nil
-	}
-	if m.Get != nil {
-		_, err := m.Get.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Put != nil {
-		_, err := m.Put.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Post != nil {
-		_, err := m.Post.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Delete != nil {
-		_, err := m.Delete.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Options != nil {
-		_, err := m.Options.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Head != nil {
-		_, err := m.Head.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Patch != nil {
-		_, err := m.Patch.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.Parameters {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside PathParameterSubSchema objects.
-func (m *PathParameterSubSchema) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Items != nil {
-		_, err := m.Items.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Default != nil {
-		_, err := m.Default.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.Enum {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Paths objects.
-func (m *Paths) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	for _, item := range m.Path {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside PrimitivesItems objects.
-func (m *PrimitivesItems) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Items != nil {
-		_, err := m.Items.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Default != nil {
-		_, err := m.Default.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.Enum {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Properties objects.
-func (m *Properties) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside QueryParameterSubSchema objects.
-func (m *QueryParameterSubSchema) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Items != nil {
-		_, err := m.Items.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Default != nil {
-		_, err := m.Default.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.Enum {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Response objects.
-func (m *Response) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.Schema != nil {
-		_, err := m.Schema.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Headers != nil {
-		_, err := m.Headers.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Examples != nil {
-		_, err := m.Examples.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside ResponseDefinitions objects.
-func (m *ResponseDefinitions) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside ResponseValue objects.
-func (m *ResponseValue) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	{
-		p, ok := m.Oneof.(*ResponseValue_Response)
-		if ok {
-			_, err := p.Response.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	{
-		p, ok := m.Oneof.(*ResponseValue_JsonReference)
-		if ok {
-			info, err := p.JsonReference.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			} else if info != nil {
-				n, err := NewResponseValue(info, nil)
-				if err != nil {
-					return nil, err
-				} else if n != nil {
-					*m = *n
-					return nil, nil
-				}
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Responses objects.
-func (m *Responses) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.ResponseCode {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Schema objects.
-func (m *Schema) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.XRef != "" {
-		info, err := compiler.ReadInfoForRef(root, m.XRef)
-		if err != nil {
-			return nil, err
-		}
-		if info != nil {
-			replacement, err := NewSchema(info, nil)
-			if err == nil {
-				*m = *replacement
-				return m.ResolveReferences(root)
-			}
-		}
-		return info, nil
-	}
-	if m.Default != nil {
-		_, err := m.Default.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.Enum {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	if m.AdditionalProperties != nil {
-		_, err := m.AdditionalProperties.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Type != nil {
-		_, err := m.Type.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Items != nil {
-		_, err := m.Items.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.AllOf {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	if m.Properties != nil {
-		_, err := m.Properties.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Xml != nil {
-		_, err := m.Xml.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.ExternalDocs != nil {
-		_, err := m.ExternalDocs.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	if m.Example != nil {
-		_, err := m.Example.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside SchemaItem objects.
-func (m *SchemaItem) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	{
-		p, ok := m.Oneof.(*SchemaItem_Schema)
-		if ok {
-			_, err := p.Schema.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	{
-		p, ok := m.Oneof.(*SchemaItem_FileSchema)
-		if ok {
-			_, err := p.FileSchema.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside SecurityDefinitions objects.
-func (m *SecurityDefinitions) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside SecurityDefinitionsItem objects.
-func (m *SecurityDefinitionsItem) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	{
-		p, ok := m.Oneof.(*SecurityDefinitionsItem_BasicAuthenticationSecurity)
-		if ok {
-			_, err := p.BasicAuthenticationSecurity.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	{
-		p, ok := m.Oneof.(*SecurityDefinitionsItem_ApiKeySecurity)
-		if ok {
-			_, err := p.ApiKeySecurity.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	{
-		p, ok := m.Oneof.(*SecurityDefinitionsItem_Oauth2ImplicitSecurity)
-		if ok {
-			_, err := p.Oauth2ImplicitSecurity.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	{
-		p, ok := m.Oneof.(*SecurityDefinitionsItem_Oauth2PasswordSecurity)
-		if ok {
-			_, err := p.Oauth2PasswordSecurity.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	{
-		p, ok := m.Oneof.(*SecurityDefinitionsItem_Oauth2ApplicationSecurity)
-		if ok {
-			_, err := p.Oauth2ApplicationSecurity.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	{
-		p, ok := m.Oneof.(*SecurityDefinitionsItem_Oauth2AccessCodeSecurity)
-		if ok {
-			_, err := p.Oauth2AccessCodeSecurity.ResolveReferences(root)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside SecurityRequirement objects.
-func (m *SecurityRequirement) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside StringArray objects.
-func (m *StringArray) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Tag objects.
-func (m *Tag) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	if m.ExternalDocs != nil {
-		_, err := m.ExternalDocs.ResolveReferences(root)
-		if err != nil {
-			errors = append(errors, err)
-		}
-	}
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside TypeItem objects.
-func (m *TypeItem) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside VendorExtension objects.
-func (m *VendorExtension) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.AdditionalProperties {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ResolveReferences resolves references found inside Xml objects.
-func (m *Xml) ResolveReferences(root string) (*yaml.Node, error) {
-	errors := make([]error, 0)
-	for _, item := range m.VendorExtension {
-		if item != nil {
-			_, err := item.ResolveReferences(root)
-			if err != nil {
-				errors = append(errors, err)
-			}
-		}
-	}
-	return nil, compiler.NewErrorGroupOrNil(errors)
-}
-
-// ToRawInfo returns a description of AdditionalPropertiesItem suitable for JSON or YAML export.
-func (m *AdditionalPropertiesItem) ToRawInfo() *yaml.Node {
-	// ONE OF WRAPPER
-	// AdditionalPropertiesItem
-	// {Name:schema Type:Schema StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v0 := m.GetSchema()
-	if v0 != nil {
-		return v0.ToRawInfo()
-	}
-	// {Name:boolean Type:bool StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	if v1, ok := m.GetOneof().(*AdditionalPropertiesItem_Boolean); ok {
-		return compiler.NewScalarNodeForBool(v1.Boolean)
-	}
-	return nil
-}
-
-// ToRawInfo returns a description of Any suitable for JSON or YAML export.
-func (m *Any) ToRawInfo() *yaml.Node {
-	var err error
-	var node yaml.Node
-	err = yaml.Unmarshal([]byte(m.Yaml), &node)
-	if err == nil {
-		if node.Kind == yaml.DocumentNode {
-			return node.Content[0]
-		}
-		return &node
-	} else {
-		return nil
-	}
-	return nil
-}
-
-// ToRawInfo returns a description of ApiKeySecurity suitable for JSON or YAML export.
-func (m *ApiKeySecurity) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type))
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("in"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.In))
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of BasicAuthenticationSecurity suitable for JSON or YAML export.
-func (m *BasicAuthenticationSecurity) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type))
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of BodyParameter suitable for JSON or YAML export.
-func (m *BodyParameter) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("in"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.In))
-	if m.Required != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("required"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.Required))
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("schema"))
-	info.Content = append(info.Content, m.Schema.ToRawInfo())
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Contact suitable for JSON or YAML export.
-func (m *Contact) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	if m.Url != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("url"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Url))
-	}
-	if m.Email != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("email"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Email))
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Default suitable for JSON or YAML export.
-func (m *Default) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.AdditionalProperties != nil {
-		for _, item := range m.AdditionalProperties {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Definitions suitable for JSON or YAML export.
-func (m *Definitions) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.AdditionalProperties != nil {
-		for _, item := range m.AdditionalProperties {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Document suitable for JSON or YAML export.
-func (m *Document) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("swagger"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Swagger))
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("info"))
-	info.Content = append(info.Content, m.Info.ToRawInfo())
-	if m.Host != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("host"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Host))
-	}
-	if m.BasePath != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("basePath"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.BasePath))
-	}
-	if len(m.Schemes) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("schemes"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Schemes))
-	}
-	if len(m.Consumes) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("consumes"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Consumes))
-	}
-	if len(m.Produces) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("produces"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Produces))
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("paths"))
-	info.Content = append(info.Content, m.Paths.ToRawInfo())
-	if m.Definitions != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("definitions"))
-		info.Content = append(info.Content, m.Definitions.ToRawInfo())
-	}
-	if m.Parameters != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("parameters"))
-		info.Content = append(info.Content, m.Parameters.ToRawInfo())
-	}
-	if m.Responses != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("responses"))
-		info.Content = append(info.Content, m.Responses.ToRawInfo())
-	}
-	if len(m.Security) != 0 {
-		items := compiler.NewSequenceNode()
-		for _, item := range m.Security {
-			items.Content = append(items.Content, item.ToRawInfo())
-		}
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("security"))
-		info.Content = append(info.Content, items)
-	}
-	if m.SecurityDefinitions != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("securityDefinitions"))
-		info.Content = append(info.Content, m.SecurityDefinitions.ToRawInfo())
-	}
-	if len(m.Tags) != 0 {
-		items := compiler.NewSequenceNode()
-		for _, item := range m.Tags {
-			items.Content = append(items.Content, item.ToRawInfo())
-		}
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("tags"))
-		info.Content = append(info.Content, items)
-	}
-	if m.ExternalDocs != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("externalDocs"))
-		info.Content = append(info.Content, m.ExternalDocs.ToRawInfo())
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Examples suitable for JSON or YAML export.
-func (m *Examples) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.AdditionalProperties != nil {
-		for _, item := range m.AdditionalProperties {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of ExternalDocs suitable for JSON or YAML export.
-func (m *ExternalDocs) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("url"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Url))
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of FileSchema suitable for JSON or YAML export.
-func (m *FileSchema) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Format != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("format"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Format))
-	}
-	if m.Title != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("title"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Title))
-	}
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.Default != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("default"))
-		info.Content = append(info.Content, m.Default.ToRawInfo())
-	}
-	if len(m.Required) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("required"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Required))
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type))
-	if m.ReadOnly != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("readOnly"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ReadOnly))
-	}
-	if m.ExternalDocs != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("externalDocs"))
-		info.Content = append(info.Content, m.ExternalDocs.ToRawInfo())
-	}
-	if m.Example != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("example"))
-		info.Content = append(info.Content, m.Example.ToRawInfo())
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of FormDataParameterSubSchema suitable for JSON or YAML export.
-func (m *FormDataParameterSubSchema) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Required != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("required"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.Required))
-	}
-	if m.In != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("in"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.In))
-	}
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	if m.AllowEmptyValue != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("allowEmptyValue"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.AllowEmptyValue))
-	}
-	if m.Type != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type))
-	}
-	if m.Format != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("format"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Format))
-	}
-	if m.Items != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("items"))
-		info.Content = append(info.Content, m.Items.ToRawInfo())
-	}
-	if m.CollectionFormat != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("collectionFormat"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.CollectionFormat))
-	}
-	if m.Default != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("default"))
-		info.Content = append(info.Content, m.Default.ToRawInfo())
-	}
-	if m.Maximum != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.Maximum))
-	}
-	if m.ExclusiveMaximum != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("exclusiveMaximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ExclusiveMaximum))
-	}
-	if m.Minimum != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.Minimum))
-	}
-	if m.ExclusiveMinimum != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("exclusiveMinimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ExclusiveMinimum))
-	}
-	if m.MaxLength != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxLength"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MaxLength))
-	}
-	if m.MinLength != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minLength"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MinLength))
-	}
-	if m.Pattern != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("pattern"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Pattern))
-	}
-	if m.MaxItems != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MaxItems))
-	}
-	if m.MinItems != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MinItems))
-	}
-	if m.UniqueItems != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("uniqueItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.UniqueItems))
-	}
-	if len(m.Enum) != 0 {
-		items := compiler.NewSequenceNode()
-		for _, item := range m.Enum {
-			items.Content = append(items.Content, item.ToRawInfo())
-		}
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("enum"))
-		info.Content = append(info.Content, items)
-	}
-	if m.MultipleOf != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("multipleOf"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.MultipleOf))
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Header suitable for JSON or YAML export.
-func (m *Header) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type))
-	if m.Format != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("format"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Format))
-	}
-	if m.Items != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("items"))
-		info.Content = append(info.Content, m.Items.ToRawInfo())
-	}
-	if m.CollectionFormat != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("collectionFormat"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.CollectionFormat))
-	}
-	if m.Default != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("default"))
-		info.Content = append(info.Content, m.Default.ToRawInfo())
-	}
-	if m.Maximum != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.Maximum))
-	}
-	if m.ExclusiveMaximum != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("exclusiveMaximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ExclusiveMaximum))
-	}
-	if m.Minimum != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.Minimum))
-	}
-	if m.ExclusiveMinimum != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("exclusiveMinimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ExclusiveMinimum))
-	}
-	if m.MaxLength != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxLength"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MaxLength))
-	}
-	if m.MinLength != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minLength"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MinLength))
-	}
-	if m.Pattern != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("pattern"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Pattern))
-	}
-	if m.MaxItems != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MaxItems))
-	}
-	if m.MinItems != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MinItems))
-	}
-	if m.UniqueItems != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("uniqueItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.UniqueItems))
-	}
-	if len(m.Enum) != 0 {
-		items := compiler.NewSequenceNode()
-		for _, item := range m.Enum {
-			items.Content = append(items.Content, item.ToRawInfo())
-		}
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("enum"))
-		info.Content = append(info.Content, items)
-	}
-	if m.MultipleOf != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("multipleOf"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.MultipleOf))
-	}
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of HeaderParameterSubSchema suitable for JSON or YAML export.
-func (m *HeaderParameterSubSchema) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Required != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("required"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.Required))
-	}
-	if m.In != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("in"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.In))
-	}
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	if m.Type != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type))
-	}
-	if m.Format != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("format"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Format))
-	}
-	if m.Items != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("items"))
-		info.Content = append(info.Content, m.Items.ToRawInfo())
-	}
-	if m.CollectionFormat != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("collectionFormat"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.CollectionFormat))
-	}
-	if m.Default != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("default"))
-		info.Content = append(info.Content, m.Default.ToRawInfo())
-	}
-	if m.Maximum != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.Maximum))
-	}
-	if m.ExclusiveMaximum != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("exclusiveMaximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ExclusiveMaximum))
-	}
-	if m.Minimum != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.Minimum))
-	}
-	if m.ExclusiveMinimum != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("exclusiveMinimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ExclusiveMinimum))
-	}
-	if m.MaxLength != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxLength"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MaxLength))
-	}
-	if m.MinLength != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minLength"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MinLength))
-	}
-	if m.Pattern != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("pattern"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Pattern))
-	}
-	if m.MaxItems != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MaxItems))
-	}
-	if m.MinItems != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MinItems))
-	}
-	if m.UniqueItems != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("uniqueItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.UniqueItems))
-	}
-	if len(m.Enum) != 0 {
-		items := compiler.NewSequenceNode()
-		for _, item := range m.Enum {
-			items.Content = append(items.Content, item.ToRawInfo())
-		}
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("enum"))
-		info.Content = append(info.Content, items)
-	}
-	if m.MultipleOf != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("multipleOf"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.MultipleOf))
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Headers suitable for JSON or YAML export.
-func (m *Headers) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.AdditionalProperties != nil {
-		for _, item := range m.AdditionalProperties {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Info suitable for JSON or YAML export.
-func (m *Info) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("title"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Title))
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("version"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Version))
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.TermsOfService != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("termsOfService"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.TermsOfService))
-	}
-	if m.Contact != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("contact"))
-		info.Content = append(info.Content, m.Contact.ToRawInfo())
-	}
-	if m.License != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("license"))
-		info.Content = append(info.Content, m.License.ToRawInfo())
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of ItemsItem suitable for JSON or YAML export.
-func (m *ItemsItem) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if len(m.Schema) != 0 {
-		items := compiler.NewSequenceNode()
-		for _, item := range m.Schema {
-			items.Content = append(items.Content, item.ToRawInfo())
-		}
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("schema"))
-		info.Content = append(info.Content, items)
-	}
-	return info
-}
-
-// ToRawInfo returns a description of JsonReference suitable for JSON or YAML export.
-func (m *JsonReference) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("$ref"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.XRef))
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	return info
-}
-
-// ToRawInfo returns a description of License suitable for JSON or YAML export.
-func (m *License) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	if m.Url != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("url"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Url))
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of NamedAny suitable for JSON or YAML export.
-func (m *NamedAny) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	// &{Name:value Type:Any StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:Mapped value}
-	return info
-}
-
-// ToRawInfo returns a description of NamedHeader suitable for JSON or YAML export.
-func (m *NamedHeader) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	// &{Name:value Type:Header StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:Mapped value}
-	return info
-}
-
-// ToRawInfo returns a description of NamedParameter suitable for JSON or YAML export.
-func (m *NamedParameter) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	// &{Name:value Type:Parameter StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:Mapped value}
-	return info
-}
-
-// ToRawInfo returns a description of NamedPathItem suitable for JSON or YAML export.
-func (m *NamedPathItem) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	// &{Name:value Type:PathItem StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:Mapped value}
-	return info
-}
-
-// ToRawInfo returns a description of NamedResponse suitable for JSON or YAML export.
-func (m *NamedResponse) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	// &{Name:value Type:Response StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:Mapped value}
-	return info
-}
-
-// ToRawInfo returns a description of NamedResponseValue suitable for JSON or YAML export.
-func (m *NamedResponseValue) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	// &{Name:value Type:ResponseValue StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:Mapped value}
-	return info
-}
-
-// ToRawInfo returns a description of NamedSchema suitable for JSON or YAML export.
-func (m *NamedSchema) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	// &{Name:value Type:Schema StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:Mapped value}
-	return info
-}
-
-// ToRawInfo returns a description of NamedSecurityDefinitionsItem suitable for JSON or YAML export.
-func (m *NamedSecurityDefinitionsItem) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	// &{Name:value Type:SecurityDefinitionsItem StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:Mapped value}
-	return info
-}
-
-// ToRawInfo returns a description of NamedString suitable for JSON or YAML export.
-func (m *NamedString) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	if m.Value != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("value"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Value))
-	}
-	return info
-}
-
-// ToRawInfo returns a description of NamedStringArray suitable for JSON or YAML export.
-func (m *NamedStringArray) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	// &{Name:value Type:StringArray StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:Mapped value}
-	return info
-}
-
-// ToRawInfo returns a description of NonBodyParameter suitable for JSON or YAML export.
-func (m *NonBodyParameter) ToRawInfo() *yaml.Node {
-	// ONE OF WRAPPER
-	// NonBodyParameter
-	// {Name:headerParameterSubSchema Type:HeaderParameterSubSchema StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v0 := m.GetHeaderParameterSubSchema()
-	if v0 != nil {
-		return v0.ToRawInfo()
-	}
-	// {Name:formDataParameterSubSchema Type:FormDataParameterSubSchema StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v1 := m.GetFormDataParameterSubSchema()
-	if v1 != nil {
-		return v1.ToRawInfo()
-	}
-	// {Name:queryParameterSubSchema Type:QueryParameterSubSchema StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v2 := m.GetQueryParameterSubSchema()
-	if v2 != nil {
-		return v2.ToRawInfo()
-	}
-	// {Name:pathParameterSubSchema Type:PathParameterSubSchema StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v3 := m.GetPathParameterSubSchema()
-	if v3 != nil {
-		return v3.ToRawInfo()
-	}
-	return nil
-}
-
-// ToRawInfo returns a description of Oauth2AccessCodeSecurity suitable for JSON or YAML export.
-func (m *Oauth2AccessCodeSecurity) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type))
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("flow"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Flow))
-	if m.Scopes != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("scopes"))
-		info.Content = append(info.Content, m.Scopes.ToRawInfo())
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("authorizationUrl"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.AuthorizationUrl))
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("tokenUrl"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.TokenUrl))
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Oauth2ApplicationSecurity suitable for JSON or YAML export.
-func (m *Oauth2ApplicationSecurity) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type))
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("flow"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Flow))
-	if m.Scopes != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("scopes"))
-		info.Content = append(info.Content, m.Scopes.ToRawInfo())
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("tokenUrl"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.TokenUrl))
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Oauth2ImplicitSecurity suitable for JSON or YAML export.
-func (m *Oauth2ImplicitSecurity) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type))
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("flow"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Flow))
-	if m.Scopes != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("scopes"))
-		info.Content = append(info.Content, m.Scopes.ToRawInfo())
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("authorizationUrl"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.AuthorizationUrl))
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Oauth2PasswordSecurity suitable for JSON or YAML export.
-func (m *Oauth2PasswordSecurity) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type))
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("flow"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Flow))
-	if m.Scopes != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("scopes"))
-		info.Content = append(info.Content, m.Scopes.ToRawInfo())
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("tokenUrl"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.TokenUrl))
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Oauth2Scopes suitable for JSON or YAML export.
-func (m *Oauth2Scopes) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// &{Name:additionalProperties Type:NamedString StringEnumValues:[] MapType:string Repeated:true Pattern: Implicit:true Description:}
-	return info
-}
-
-// ToRawInfo returns a description of Operation suitable for JSON or YAML export.
-func (m *Operation) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if len(m.Tags) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("tags"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Tags))
-	}
-	if m.Summary != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("summary"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Summary))
-	}
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.ExternalDocs != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("externalDocs"))
-		info.Content = append(info.Content, m.ExternalDocs.ToRawInfo())
-	}
-	if m.OperationId != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("operationId"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.OperationId))
-	}
-	if len(m.Produces) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("produces"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Produces))
-	}
-	if len(m.Consumes) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("consumes"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Consumes))
-	}
-	if len(m.Parameters) != 0 {
-		items := compiler.NewSequenceNode()
-		for _, item := range m.Parameters {
-			items.Content = append(items.Content, item.ToRawInfo())
-		}
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("parameters"))
-		info.Content = append(info.Content, items)
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("responses"))
-	info.Content = append(info.Content, m.Responses.ToRawInfo())
-	if len(m.Schemes) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("schemes"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Schemes))
-	}
-	if m.Deprecated != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("deprecated"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.Deprecated))
-	}
-	if len(m.Security) != 0 {
-		items := compiler.NewSequenceNode()
-		for _, item := range m.Security {
-			items.Content = append(items.Content, item.ToRawInfo())
-		}
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("security"))
-		info.Content = append(info.Content, items)
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Parameter suitable for JSON or YAML export.
-func (m *Parameter) ToRawInfo() *yaml.Node {
-	// ONE OF WRAPPER
-	// Parameter
-	// {Name:bodyParameter Type:BodyParameter StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v0 := m.GetBodyParameter()
-	if v0 != nil {
-		return v0.ToRawInfo()
-	}
-	// {Name:nonBodyParameter Type:NonBodyParameter StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v1 := m.GetNonBodyParameter()
-	if v1 != nil {
-		return v1.ToRawInfo()
-	}
-	return nil
-}
-
-// ToRawInfo returns a description of ParameterDefinitions suitable for JSON or YAML export.
-func (m *ParameterDefinitions) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.AdditionalProperties != nil {
-		for _, item := range m.AdditionalProperties {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of ParametersItem suitable for JSON or YAML export.
-func (m *ParametersItem) ToRawInfo() *yaml.Node {
-	// ONE OF WRAPPER
-	// ParametersItem
-	// {Name:parameter Type:Parameter StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v0 := m.GetParameter()
-	if v0 != nil {
-		return v0.ToRawInfo()
-	}
-	// {Name:jsonReference Type:JsonReference StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v1 := m.GetJsonReference()
-	if v1 != nil {
-		return v1.ToRawInfo()
-	}
-	return nil
-}
-
-// ToRawInfo returns a description of PathItem suitable for JSON or YAML export.
-func (m *PathItem) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.XRef != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("$ref"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.XRef))
-	}
-	if m.Get != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("get"))
-		info.Content = append(info.Content, m.Get.ToRawInfo())
-	}
-	if m.Put != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("put"))
-		info.Content = append(info.Content, m.Put.ToRawInfo())
-	}
-	if m.Post != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("post"))
-		info.Content = append(info.Content, m.Post.ToRawInfo())
-	}
-	if m.Delete != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("delete"))
-		info.Content = append(info.Content, m.Delete.ToRawInfo())
-	}
-	if m.Options != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("options"))
-		info.Content = append(info.Content, m.Options.ToRawInfo())
-	}
-	if m.Head != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("head"))
-		info.Content = append(info.Content, m.Head.ToRawInfo())
-	}
-	if m.Patch != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("patch"))
-		info.Content = append(info.Content, m.Patch.ToRawInfo())
-	}
-	if len(m.Parameters) != 0 {
-		items := compiler.NewSequenceNode()
-		for _, item := range m.Parameters {
-			items.Content = append(items.Content, item.ToRawInfo())
-		}
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("parameters"))
-		info.Content = append(info.Content, items)
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of PathParameterSubSchema suitable for JSON or YAML export.
-func (m *PathParameterSubSchema) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("required"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.Required))
-	if m.In != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("in"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.In))
-	}
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	if m.Type != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type))
-	}
-	if m.Format != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("format"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Format))
-	}
-	if m.Items != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("items"))
-		info.Content = append(info.Content, m.Items.ToRawInfo())
-	}
-	if m.CollectionFormat != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("collectionFormat"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.CollectionFormat))
-	}
-	if m.Default != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("default"))
-		info.Content = append(info.Content, m.Default.ToRawInfo())
-	}
-	if m.Maximum != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.Maximum))
-	}
-	if m.ExclusiveMaximum != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("exclusiveMaximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ExclusiveMaximum))
-	}
-	if m.Minimum != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.Minimum))
-	}
-	if m.ExclusiveMinimum != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("exclusiveMinimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ExclusiveMinimum))
-	}
-	if m.MaxLength != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxLength"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MaxLength))
-	}
-	if m.MinLength != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minLength"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MinLength))
-	}
-	if m.Pattern != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("pattern"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Pattern))
-	}
-	if m.MaxItems != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MaxItems))
-	}
-	if m.MinItems != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MinItems))
-	}
-	if m.UniqueItems != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("uniqueItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.UniqueItems))
-	}
-	if len(m.Enum) != 0 {
-		items := compiler.NewSequenceNode()
-		for _, item := range m.Enum {
-			items.Content = append(items.Content, item.ToRawInfo())
-		}
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("enum"))
-		info.Content = append(info.Content, items)
-	}
-	if m.MultipleOf != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("multipleOf"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.MultipleOf))
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Paths suitable for JSON or YAML export.
-func (m *Paths) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	if m.Path != nil {
-		for _, item := range m.Path {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of PrimitivesItems suitable for JSON or YAML export.
-func (m *PrimitivesItems) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Type != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type))
-	}
-	if m.Format != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("format"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Format))
-	}
-	if m.Items != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("items"))
-		info.Content = append(info.Content, m.Items.ToRawInfo())
-	}
-	if m.CollectionFormat != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("collectionFormat"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.CollectionFormat))
-	}
-	if m.Default != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("default"))
-		info.Content = append(info.Content, m.Default.ToRawInfo())
-	}
-	if m.Maximum != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.Maximum))
-	}
-	if m.ExclusiveMaximum != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("exclusiveMaximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ExclusiveMaximum))
-	}
-	if m.Minimum != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.Minimum))
-	}
-	if m.ExclusiveMinimum != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("exclusiveMinimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ExclusiveMinimum))
-	}
-	if m.MaxLength != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxLength"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MaxLength))
-	}
-	if m.MinLength != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minLength"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MinLength))
-	}
-	if m.Pattern != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("pattern"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Pattern))
-	}
-	if m.MaxItems != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MaxItems))
-	}
-	if m.MinItems != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MinItems))
-	}
-	if m.UniqueItems != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("uniqueItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.UniqueItems))
-	}
-	if len(m.Enum) != 0 {
-		items := compiler.NewSequenceNode()
-		for _, item := range m.Enum {
-			items.Content = append(items.Content, item.ToRawInfo())
-		}
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("enum"))
-		info.Content = append(info.Content, items)
-	}
-	if m.MultipleOf != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("multipleOf"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.MultipleOf))
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Properties suitable for JSON or YAML export.
-func (m *Properties) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.AdditionalProperties != nil {
-		for _, item := range m.AdditionalProperties {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of QueryParameterSubSchema suitable for JSON or YAML export.
-func (m *QueryParameterSubSchema) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Required != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("required"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.Required))
-	}
-	if m.In != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("in"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.In))
-	}
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	if m.AllowEmptyValue != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("allowEmptyValue"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.AllowEmptyValue))
-	}
-	if m.Type != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type))
-	}
-	if m.Format != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("format"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Format))
-	}
-	if m.Items != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("items"))
-		info.Content = append(info.Content, m.Items.ToRawInfo())
-	}
-	if m.CollectionFormat != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("collectionFormat"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.CollectionFormat))
-	}
-	if m.Default != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("default"))
-		info.Content = append(info.Content, m.Default.ToRawInfo())
-	}
-	if m.Maximum != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.Maximum))
-	}
-	if m.ExclusiveMaximum != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("exclusiveMaximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ExclusiveMaximum))
-	}
-	if m.Minimum != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.Minimum))
-	}
-	if m.ExclusiveMinimum != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("exclusiveMinimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ExclusiveMinimum))
-	}
-	if m.MaxLength != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxLength"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MaxLength))
-	}
-	if m.MinLength != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minLength"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MinLength))
-	}
-	if m.Pattern != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("pattern"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Pattern))
-	}
-	if m.MaxItems != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MaxItems))
-	}
-	if m.MinItems != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MinItems))
-	}
-	if m.UniqueItems != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("uniqueItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.UniqueItems))
-	}
-	if len(m.Enum) != 0 {
-		items := compiler.NewSequenceNode()
-		for _, item := range m.Enum {
-			items.Content = append(items.Content, item.ToRawInfo())
-		}
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("enum"))
-		info.Content = append(info.Content, items)
-	}
-	if m.MultipleOf != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("multipleOf"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.MultipleOf))
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Response suitable for JSON or YAML export.
-func (m *Response) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	if m.Schema != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("schema"))
-		info.Content = append(info.Content, m.Schema.ToRawInfo())
-	}
-	if m.Headers != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("headers"))
-		info.Content = append(info.Content, m.Headers.ToRawInfo())
-	}
-	if m.Examples != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("examples"))
-		info.Content = append(info.Content, m.Examples.ToRawInfo())
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of ResponseDefinitions suitable for JSON or YAML export.
-func (m *ResponseDefinitions) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.AdditionalProperties != nil {
-		for _, item := range m.AdditionalProperties {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of ResponseValue suitable for JSON or YAML export.
-func (m *ResponseValue) ToRawInfo() *yaml.Node {
-	// ONE OF WRAPPER
-	// ResponseValue
-	// {Name:response Type:Response StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v0 := m.GetResponse()
-	if v0 != nil {
-		return v0.ToRawInfo()
-	}
-	// {Name:jsonReference Type:JsonReference StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v1 := m.GetJsonReference()
-	if v1 != nil {
-		return v1.ToRawInfo()
-	}
-	return nil
-}
-
-// ToRawInfo returns a description of Responses suitable for JSON or YAML export.
-func (m *Responses) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.ResponseCode != nil {
-		for _, item := range m.ResponseCode {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Schema suitable for JSON or YAML export.
-func (m *Schema) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.XRef != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("$ref"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.XRef))
-	}
-	if m.Format != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("format"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Format))
-	}
-	if m.Title != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("title"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Title))
-	}
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.Default != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("default"))
-		info.Content = append(info.Content, m.Default.ToRawInfo())
-	}
-	if m.MultipleOf != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("multipleOf"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.MultipleOf))
-	}
-	if m.Maximum != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.Maximum))
-	}
-	if m.ExclusiveMaximum != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("exclusiveMaximum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ExclusiveMaximum))
-	}
-	if m.Minimum != 0.0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForFloat(m.Minimum))
-	}
-	if m.ExclusiveMinimum != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("exclusiveMinimum"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ExclusiveMinimum))
-	}
-	if m.MaxLength != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxLength"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MaxLength))
-	}
-	if m.MinLength != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minLength"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MinLength))
-	}
-	if m.Pattern != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("pattern"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Pattern))
-	}
-	if m.MaxItems != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MaxItems))
-	}
-	if m.MinItems != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MinItems))
-	}
-	if m.UniqueItems != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("uniqueItems"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.UniqueItems))
-	}
-	if m.MaxProperties != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("maxProperties"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MaxProperties))
-	}
-	if m.MinProperties != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("minProperties"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForInt(m.MinProperties))
-	}
-	if len(m.Required) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("required"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Required))
-	}
-	if len(m.Enum) != 0 {
-		items := compiler.NewSequenceNode()
-		for _, item := range m.Enum {
-			items.Content = append(items.Content, item.ToRawInfo())
-		}
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("enum"))
-		info.Content = append(info.Content, items)
-	}
-	if m.AdditionalProperties != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("additionalProperties"))
-		info.Content = append(info.Content, m.AdditionalProperties.ToRawInfo())
-	}
-	if m.Type != nil {
-		if len(m.Type.Value) == 1 {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Type.Value[0]))
-		} else {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString("type"))
-			info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Type.Value))
-		}
-	}
-	if m.Items != nil {
-		items := compiler.NewSequenceNode()
-		for _, item := range m.Items.Schema {
-			items.Content = append(items.Content, item.ToRawInfo())
-		}
-		if len(items.Content) == 1 {
-			items = items.Content[0]
-		}
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("items"))
-		info.Content = append(info.Content, items)
-	}
-	if len(m.AllOf) != 0 {
-		items := compiler.NewSequenceNode()
-		for _, item := range m.AllOf {
-			items.Content = append(items.Content, item.ToRawInfo())
-		}
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("allOf"))
-		info.Content = append(info.Content, items)
-	}
-	if m.Properties != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("properties"))
-		info.Content = append(info.Content, m.Properties.ToRawInfo())
-	}
-	if m.Discriminator != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("discriminator"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Discriminator))
-	}
-	if m.ReadOnly != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("readOnly"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.ReadOnly))
-	}
-	if m.Xml != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("xml"))
-		info.Content = append(info.Content, m.Xml.ToRawInfo())
-	}
-	if m.ExternalDocs != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("externalDocs"))
-		info.Content = append(info.Content, m.ExternalDocs.ToRawInfo())
-	}
-	if m.Example != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("example"))
-		info.Content = append(info.Content, m.Example.ToRawInfo())
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of SchemaItem suitable for JSON or YAML export.
-func (m *SchemaItem) ToRawInfo() *yaml.Node {
-	// ONE OF WRAPPER
-	// SchemaItem
-	// {Name:schema Type:Schema StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v0 := m.GetSchema()
-	if v0 != nil {
-		return v0.ToRawInfo()
-	}
-	// {Name:fileSchema Type:FileSchema StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v1 := m.GetFileSchema()
-	if v1 != nil {
-		return v1.ToRawInfo()
-	}
-	return nil
-}
-
-// ToRawInfo returns a description of SecurityDefinitions suitable for JSON or YAML export.
-func (m *SecurityDefinitions) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.AdditionalProperties != nil {
-		for _, item := range m.AdditionalProperties {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of SecurityDefinitionsItem suitable for JSON or YAML export.
-func (m *SecurityDefinitionsItem) ToRawInfo() *yaml.Node {
-	// ONE OF WRAPPER
-	// SecurityDefinitionsItem
-	// {Name:basicAuthenticationSecurity Type:BasicAuthenticationSecurity StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v0 := m.GetBasicAuthenticationSecurity()
-	if v0 != nil {
-		return v0.ToRawInfo()
-	}
-	// {Name:apiKeySecurity Type:ApiKeySecurity StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v1 := m.GetApiKeySecurity()
-	if v1 != nil {
-		return v1.ToRawInfo()
-	}
-	// {Name:oauth2ImplicitSecurity Type:Oauth2ImplicitSecurity StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v2 := m.GetOauth2ImplicitSecurity()
-	if v2 != nil {
-		return v2.ToRawInfo()
-	}
-	// {Name:oauth2PasswordSecurity Type:Oauth2PasswordSecurity StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v3 := m.GetOauth2PasswordSecurity()
-	if v3 != nil {
-		return v3.ToRawInfo()
-	}
-	// {Name:oauth2ApplicationSecurity Type:Oauth2ApplicationSecurity StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v4 := m.GetOauth2ApplicationSecurity()
-	if v4 != nil {
-		return v4.ToRawInfo()
-	}
-	// {Name:oauth2AccessCodeSecurity Type:Oauth2AccessCodeSecurity StringEnumValues:[] MapType: Repeated:false Pattern: Implicit:false Description:}
-	v5 := m.GetOauth2AccessCodeSecurity()
-	if v5 != nil {
-		return v5.ToRawInfo()
-	}
-	return nil
-}
-
-// ToRawInfo returns a description of SecurityRequirement suitable for JSON or YAML export.
-func (m *SecurityRequirement) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.AdditionalProperties != nil {
-		for _, item := range m.AdditionalProperties {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of StringArray suitable for JSON or YAML export.
-func (m *StringArray) ToRawInfo() *yaml.Node {
-	return compiler.NewSequenceNodeForStringArray(m.Value)
-}
-
-// ToRawInfo returns a description of Tag suitable for JSON or YAML export.
-func (m *Tag) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	// always include this required field.
-	info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-	info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	if m.Description != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("description"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Description))
-	}
-	if m.ExternalDocs != nil {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("externalDocs"))
-		info.Content = append(info.Content, m.ExternalDocs.ToRawInfo())
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of TypeItem suitable for JSON or YAML export.
-func (m *TypeItem) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if len(m.Value) != 0 {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("value"))
-		info.Content = append(info.Content, compiler.NewSequenceNodeForStringArray(m.Value))
-	}
-	return info
-}
-
-// ToRawInfo returns a description of VendorExtension suitable for JSON or YAML export.
-func (m *VendorExtension) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.AdditionalProperties != nil {
-		for _, item := range m.AdditionalProperties {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
-}
-
-// ToRawInfo returns a description of Xml suitable for JSON or YAML export.
-func (m *Xml) ToRawInfo() *yaml.Node {
-	info := compiler.NewMappingNode()
-	if m == nil {
-		return info
-	}
-	if m.Name != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("name"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Name))
-	}
-	if m.Namespace != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("namespace"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Namespace))
-	}
-	if m.Prefix != "" {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("prefix"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForString(m.Prefix))
-	}
-	if m.Attribute != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("attribute"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.Attribute))
-	}
-	if m.Wrapped != false {
-		info.Content = append(info.Content, compiler.NewScalarNodeForString("wrapped"))
-		info.Content = append(info.Content, compiler.NewScalarNodeForBool(m.Wrapped))
-	}
-	if m.VendorExtension != nil {
-		for _, item := range m.VendorExtension {
-			info.Content = append(info.Content, compiler.NewScalarNodeForString(item.Name))
-			info.Content = append(info.Content, item.Value.ToRawInfo())
-		}
-	}
-	return info
 }
 
 var (

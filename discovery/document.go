@@ -15,7 +15,9 @@
 package discovery_v1
 
 import (
-	"github.com/googleapis/gnostic/compiler"
+	"errors"
+
+	"github.com/google/gnostic/compiler"
 )
 
 // FetchDocumentBytes downloads the bytes of a discovery document from a URL.
@@ -29,5 +31,11 @@ func ParseDocument(b []byte) (*Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewDocument(info.Content[0], compiler.NewContext("$root", nil))
+
+	if len(info.Content) < 1 {
+		return nil, errors.New("document has no content")
+	}
+
+	root := info.Content[0]
+	return NewDocument(root, compiler.NewContext("$root", root, nil))
 }
