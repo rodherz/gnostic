@@ -5,14 +5,13 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
 	"strings"
 
-	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes/any"
+	"google.golang.org/protobuf/proto"
+	any "google.golang.org/protobuf/types/known/anypb"
 
 	discovery "github.com/google/gnostic/discovery"
 	openapiv2 "github.com/google/gnostic/openapiv2"
@@ -67,8 +66,9 @@ When the -plugin option is specified, these flags are ignored.`)
 		// Handle invocation as a plugin.
 
 		// Read the plugin input.
-		pluginData, err := ioutil.ReadAll(os.Stdin)
-		env.RespondAndExitIfError(err)
+		pluginData, err := io.ReadAll(os.Stdin)
+		//pluginData, err := os.ReadFile(*input)
+		//env.RespondAndExitIfError(err)
 		if len(pluginData) == 0 {
 			env.RespondAndExitIfError(fmt.Errorf("no input data"))
 		}
@@ -93,7 +93,7 @@ When the -plugin option is specified, these flags are ignored.`)
 		// Handle invocation from the command line.
 
 		// Read the input document.
-		apiData, err := ioutil.ReadFile(*input)
+		apiData, err := os.ReadFile(*input)
 		if len(apiData) == 0 {
 			env.RespondAndExitIfError(fmt.Errorf("no input data"))
 		}
