@@ -11,8 +11,8 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/stoewer/go-strcase v1.3.0
 	golang.org/x/tools v0.32.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20250409194420-de1ac958c67a
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250409194420-de1ac958c67a
+	google.golang.org/genproto/googleapis/api v0.0.0-20250422160041-2d3770c4ea7f
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250422160041-2d3770c4ea7f
 	google.golang.org/protobuf v1.36.6
 	gopkg.in/yaml.v3 v3.0.1
 )
